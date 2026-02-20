@@ -15,32 +15,99 @@ build-type:         Simple
 extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
-common warnings
+common common-options
     ghc-options: -Wall
+    build-depends: relude
+    mixins: base hiding (Prelude)
+          , relude (Relude as Prelude)
+          , relude
+    default-extensions:  BangPatterns
+                         ConstraintKinds
+                         DataKinds
+                         DeriveGeneric
+                         DerivingStrategies
+                         DerivingVia
+                         FlexibleContexts
+                         FlexibleInstances
+                         GeneralizedNewtypeDeriving
+                         InstanceSigs
+                         KindSignatures
+                         LambdaCase
+                         MultiParamTypeClasses
+                         OverloadedStrings
+                         OverloadedLabels
+                         RecordWildCards
+                         ScopedTypeVariables
+                         TypeApplications
+                         TypeFamilies
+                         TypeOperators          
+
 
 library
-    import:           warnings
-    exposed-modules:  MyLib
-    -- other-modules:
-    -- other-extensions:
+    import:           common-options
+    exposed-modules:
+                      Lib
+                      Lib.App
+                      Lib.App.Env
+                      Lib.App.Error
+                      Lib.App.Monad
+
+                      Lib.Effects.Log
+                      
     build-depends:    base ^>=4.19.2.0
+                    , aeson
+                    , lens
+                    , mtl
+                    , postgresql-simple
+                    , resource-pool
+                    , servant-client
+                    , servant-server
+                    , case-insensitive
+                    , http-types
+                    , text
+                    , time
+                    , wai
+                    , wai-extra
+                    , warp
+                    , co-log
+    default-extensions:   BangPatterns
+                          ConstraintKinds
+                          DataKinds
+                          DeriveGeneric
+                          DerivingStrategies
+                          DerivingVia
+                          FlexibleContexts
+                          FlexibleInstances
+                          GeneralizedNewtypeDeriving
+                          InstanceSigs
+                          KindSignatures
+                          LambdaCase
+                          MultiParamTypeClasses
+                          OverloadedStrings
+                          OverloadedLabels
+                          RecordWildCards
+                          ScopedTypeVariables
+                          TypeApplications
+                          TypeFamilies
+                          TypeOperators
     hs-source-dirs:   src
     default-language: Haskell2010
 
 executable initiative
-    import:           warnings
+    import:           common-options
     main-is:          Main.hs
     -- other-modules:
     -- other-extensions:
     build-depends:
         base ^>=4.19.2.0,
         initiative
+    pkgconfig-depends: zlib
 
     hs-source-dirs:   app
     default-language: Haskell2010
 
 test-suite initiative-test
-    import:           warnings
+    import:           common-options
     default-language: Haskell2010
     -- other-modules:
     -- other-extensions:
