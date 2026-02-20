@@ -1,7 +1,6 @@
 module Main where
 
-import qualified App
+import qualified Lib
 
 main :: IO ()
-main = do
-  putStrLn "Hello, Haskell!"
+main = Lib.main

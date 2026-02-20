@@ -46,20 +46,35 @@ common common-options
 library
     import:           common-options
     exposed-modules:
+                      -- Application monad setup
                       Lib
                       Lib.App
                       Lib.App.Env
                       Lib.App.Error
                       Lib.App.Monad
 
+                      Lib.Config
+
+                      -- Effects
                       Lib.Effects.Log
+
+                      -- Database
+                      Lib.Db
+                      Lib.Db.Functions
+                      Lib.Db.Schema
+                      Lib.Db.User
+
+                      -- Server
+                      Lib.Server
                       
     build-depends:    base ^>=4.19.2.0
                     , aeson
                     , lens
+                    , tomland
                     , mtl
                     , postgresql-simple
                     , resource-pool
+                    , servant
                     , servant-client
                     , servant-server
                     , case-insensitive

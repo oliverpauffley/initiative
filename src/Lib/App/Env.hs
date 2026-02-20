@@ -1,5 +1,7 @@
 module Lib.App.Env (
     Env (..),
+    grab,
+    Has (..),
     DbPool,
 ) where
 
@@ -23,3 +25,13 @@ instance HasLog (Env m) Message m where
     setLogAction :: LogAction m Message -> Env m -> Env m
     setLogAction newAction env = env{envLogAction = newAction}
     {-# INLINE setLogAction #-}
+
+class Has field env where
+    obtain :: env -> field
+
+instance Has DbPool (Env m) where obtain = envDbPool
+instance Has (LogAction m Message) (Env m) where obtain = envLogAction
+
+grab :: forall field env m. (MonadReader env m, Has field env) => m field
+grab = asks $ obtain @field
+{-# INLINE grab #-}

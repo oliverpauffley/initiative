@@ -6,15 +6,20 @@ module Lib.Effects.Log (
     runAppAsHandler,
     runAppLogIO,
     runAppLogIO_,
+    WithLog,
 ) where
 
 import Colog (LogAction, Message, Msg (..), Severity, filterBySeverity, richMessageAction, pattern E)
+import qualified Colog (WithLog)
+
 import Control.Monad.Except (liftEither)
 
 import Servant.Server (Handler)
 
 import Colog.Message (log)
 import Lib.App (App, AppEnv, AppError, runAppAsIO, toHttpError)
+
+type WithLog env m = Colog.WithLog env Colog.Message m
 
 -- | Main log action for the application. Prints message with some metadata to @stdout@.
 mainLogAction :: (MonadIO m) => Severity -> LogAction m Message

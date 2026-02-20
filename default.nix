@@ -1,5 +1,6 @@
-{ mkDerivation, aeson, base, lens, lib, mtl, postgresql-simple
-, relude, servant-client, servant-server, text, time, wai
+{ mkDerivation, aeson, base, case-insensitive, co-log, http-types
+, lens, lib, mtl, postgresql-simple, relude, resource-pool, servant
+, servant-client, servant-server, text, time, tomland, wai
 , wai-extra, warp, zlib
 }:
 mkDerivation {
@@ -9,8 +10,9 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base lens mtl postgresql-simple relude servant-client
-    servant-server text time wai wai-extra warp
+    aeson base case-insensitive co-log http-types lens mtl
+    postgresql-simple relude resource-pool servant servant-client
+    servant-server text time tomland wai wai-extra warp
   ];
   executableHaskellDepends = [ base relude ];
   executablePkgconfigDepends = [ zlib ];
