@@ -62,10 +62,14 @@ library
                       Lib.Db
                       Lib.Db.Functions
                       Lib.Db.Schema
-                      Lib.Db.User
+                      Lib.Db.Game
 
                       -- Server
                       Lib.Server
+
+
+                      -- Core types
+                      Lib.Core.Game
                       
     build-depends:    base ^>=4.19.2.0
                     , aeson
