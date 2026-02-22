@@ -22,5 +22,15 @@ withPool f = do
     pool <- grab @DbPool
     liftIO $ Pool.withResource pool f
 
+-- | Runs a query with a row parser.
 queryWith_ :: (WithDb env m, WithError m) => RowParser res -> Sql.Query -> m [res]
 queryWith_ r q = withPool $ \conn -> Sql.queryWith_ r conn q
+{-# INLINE queryWith_ #-}
+
+-- | Executes a query without arguments that is not expected to return results.
+executeRaw ::
+    (WithDb env m) =>
+    Sql.Query ->
+    m ()
+executeRaw q = withPool $ \conn -> void $ Sql.execute_ conn q
+{-# INLINE executeRaw #-}

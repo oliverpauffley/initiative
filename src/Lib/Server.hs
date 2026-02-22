@@ -1,13 +1,16 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE PatternSynonyms #-}
 
 module Lib.Server where
 
-import Colog (log, pattern D)
+import Colog (log, pattern D, pattern I)
+import Data.Aeson (FromJSON)
 import Lib.App (WithError)
 import Lib.App.Monad (App, AppEnv)
+import Lib.Core.Game (Game (..), GameID (..))
 import Lib.Db (WithDb)
 import Lib.Effects.Log (WithLog, runAppAsHandler)
-import Servant (Application, Capture, Get, JSON, ReqBody, serve, (:-), (:>))
+import Servant (Application, Capture, Get, JSON, Post, ReqBody, serve, (:-), (:<|>), (:>))
 import Servant.API.Generic (ToServantApi, toServant)
 import Servant.Server (Server, hoistServer)
 import Servant.Server.Generic (AsServerT)
@@ -19,13 +22,14 @@ type Api = ToApi Site
 type AppServer = AsServerT App
 
 data Site route = Site
-    { getRoute ::
+    { getAllGames ::
         route
-            :- "events" :> Get '[JSON] GetResponse
+            :- "games" :> Get '[JSON] [Game]
+    , postNewGame ::
+        route
+            :- "games" :> ReqBody '[JSON] NewGameRequest :> Post '[JSON] Game
     }
     deriving (Generic)
-
-type GetResponse = Text
 
 server :: AppEnv -> Server Api
 server env =
@@ -43,10 +47,18 @@ application env =
 apiServer :: Site AppServer
 apiServer =
     Site
-        { getRoute = getHandler
+        { getAllGames = getAllGamesHandler
+        , postNewGame = postNewGameHandler
         }
 
-getHandler :: (WithDb env m, WithError m, WithLog env m) => m GetResponse
-getHandler = do
-    log D "test debug"
-    return "hello!"
+getAllGamesHandler :: (WithDb env m, WithError m, WithLog env m) => m [Game]
+getAllGamesHandler = do
+    log I "Get all game"
+    return []
+
+data NewGameRequest = NewGameRequest {}
+    deriving stock (Eq, Show, Generic)
+    deriving (FromJSON)
+
+postNewGameHandler :: (WithDb env m, WithError m, WithLog env m) => NewGameRequest -> m Game
+postNewGameHandler _req = return $ Game (GameID 1) "Test game" "test system" []

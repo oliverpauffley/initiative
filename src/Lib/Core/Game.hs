@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
 -- | Games are the DM created groupings for a TTRPG.
-module Lib.Core.Game (Game (..), Session (..), GameID) where
+module Lib.Core.Game (Game (..), Session (..), GameID (..)) where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Time.Clock (UTCTime (..))
