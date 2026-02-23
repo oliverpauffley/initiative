@@ -7,8 +7,9 @@ import Colog (log, pattern D, pattern I)
 import Data.Aeson (FromJSON)
 import Lib.App (WithError)
 import Lib.App.Monad (App, AppEnv)
-import Lib.Core.Game (Game (..), GameID (..))
+import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (..))
 import Lib.Db (WithDb)
+import Lib.Db.Game (getGamesWithSessions, insertGame)
 import Lib.Effects.Log (WithLog, runAppAsHandler)
 import Servant (Application, Capture, Get, JSON, Post, ReqBody, serve, (:-), (:<|>), (:>))
 import Servant.API.Generic (ToServantApi, toServant)
@@ -53,12 +54,9 @@ apiServer =
 
 getAllGamesHandler :: (WithDb env m, WithError m, WithLog env m) => m [Game]
 getAllGamesHandler = do
-    log I "Get all game"
-    return []
-
-data NewGameRequest = NewGameRequest {}
-    deriving stock (Eq, Show, Generic)
-    deriving (FromJSON)
+    getGamesWithSessions
 
 postNewGameHandler :: (WithDb env m, WithError m, WithLog env m) => NewGameRequest -> m Game
-postNewGameHandler _req = return $ Game (GameID 1) "Test game" "test system" []
+postNewGameHandler r'@NewGameRequest{..} = do
+    gID <- insertGame r'
+    return $ Game gID newGameName newGameSystem []

@@ -7,7 +7,8 @@ create TABLE IF NOT EXISTS games (
 
 create TABLE IF NOT EXISTS sessions (
    id SERIAL PRIMARY KEY
- , gameID INT REFERENCES games(id)
+ , game_id INT REFERENCES games(id)
  , start_time TIMESTAMP WITH TIME ZONE NOT NULL
  , end_time TIMESTAMP WITH TIME ZONE NOT NULL
+ , name TEXT NOT NULL
 );

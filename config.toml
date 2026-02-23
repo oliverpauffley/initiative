@@ -1,2 +1,2 @@
-dbCredentials = "host=localhost post=5432 user=dev dbname=initiative password=dev-password"
+dbCredentials = "host=localhost port=5432 user=dev dbname=initiative password=dev-password"
 log.severity  = "Debug"
