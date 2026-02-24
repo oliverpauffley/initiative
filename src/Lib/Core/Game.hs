@@ -9,7 +9,7 @@ import Database.PostgreSQL.Simple (FromRow, ToRow)
 import Database.PostgreSQL.Simple.FromField (FromField)
 import Database.PostgreSQL.Simple.ToField (ToField)
 
-newtype GameID = GameID Int
+newtype GameID = GameID {gID :: Int}
     deriving stock (Generic, Show, Eq, Ord)
     deriving anyclass (FromRow)
     deriving newtype (ToField, FromField, FromJSON, ToJSON)

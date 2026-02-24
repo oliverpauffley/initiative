@@ -34,6 +34,11 @@ query q args = withPool $ \conn -> Sql.query conn q args
 {-# INLINE query #-}
 
 -- | Runs a query with a row parser.
+queryWith :: (WithDb env m, Sql.ToRow args, WithError m) => RowParser res -> Sql.Query -> args -> m [res]
+queryWith r q args = withPool $ \conn -> Sql.queryWith r conn q args
+{-# INLINE queryWith #-}
+
+-- | Runs a query with a row parser with no args.
 queryWith_ :: (WithDb env m, WithError m) => RowParser res -> Sql.Query -> m [res]
 queryWith_ r q = withPool $ \conn -> Sql.queryWith_ r conn q
 {-# INLINE queryWith_ #-}

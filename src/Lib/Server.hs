@@ -8,7 +8,7 @@ import Data.Aeson (FromJSON)
 import Lib.App (WithError)
 import Lib.App.Monad (App, AppEnv)
 import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (..))
-import Lib.Db (WithDb)
+import Lib.Db (WithDb, getGameWithSessions)
 import Lib.Db.Game (getGamesWithSessions, insertGame)
 import Lib.Effects.Log (WithLog, runAppAsHandler)
 import Servant (Application, Capture, Get, JSON, Post, ReqBody, serve, (:-), (:<|>), (:>))
@@ -26,6 +26,7 @@ data Site route = Site
     { getAllGames ::
         route
             :- "games" :> Get '[JSON] [Game]
+    , getGame :: route :- "games" :> Capture "gameID" Int :> Get '[JSON] Game
     , postNewGame ::
         route
             :- "games" :> ReqBody '[JSON] NewGameRequest :> Post '[JSON] Game
@@ -49,12 +50,16 @@ apiServer :: Site AppServer
 apiServer =
     Site
         { getAllGames = getAllGamesHandler
+        , getGame = getGameHandler
         , postNewGame = postNewGameHandler
         }
 
 getAllGamesHandler :: (WithDb env m, WithError m, WithLog env m) => m [Game]
 getAllGamesHandler = do
     getGamesWithSessions
+
+getGameHandler :: (WithDb env m, WithError m, WithLog env m) => Int -> m Game
+getGameHandler gID = getGameWithSessions (GameID gID)
 
 postNewGameHandler :: (WithDb env m, WithError m, WithLog env m) => NewGameRequest -> m Game
 postNewGameHandler r'@NewGameRequest{..} = do

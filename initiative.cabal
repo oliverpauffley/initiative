@@ -128,11 +128,18 @@ executable initiative
 test-suite initiative-test
     import:           common-options
     default-language: Haskell2010
-    -- other-modules:
-    -- other-extensions:
+    other-modules:    Test.Server
+                      Test.Common
+                      Test.Assert
+        -- other-extensions:
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Main.hs
     build-depends:
-        base ^>=4.19.2.0,
-        initiative
+        base ^>=4.19.2.0
+      , initiative
+      , resource-pool
+      , hedgehog
+      , mtl
+      , hspec
+      , hspec-core

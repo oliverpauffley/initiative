@@ -1,7 +1,8 @@
-module Lib.Db.Game (getGamesWithSessions, insertGame) where
+module Lib.Db.Game (getGamesWithSessions, insertGame, getGameWithSessions) where
 
 import qualified Data.Map.Strict as Map
 import Data.Time (UTCTime)
+import Database.PostgreSQL.Simple (Only (..))
 import Database.PostgreSQL.Simple.FromRow (RowParser, field)
 import Lib.App (WithError)
 import Lib.Core.Game (
@@ -10,7 +11,7 @@ import Lib.Core.Game (
     NewGameRequest (..),
     Session (Session),
  )
-import Lib.Db.Functions (WithDb, asSingleRow, query, queryWith_)
+import Lib.Db.Functions (WithDb, asSingleRow, query, queryWith, queryWith_)
 
 getGamesWithSessions :: (WithDb env m, WithError m) => m [Game]
 getGamesWithSessions = do
@@ -22,6 +23,16 @@ getGamesWithSessions = do
     flatRows <- queryWith_ parseGameJoinRow sql
 
     return $ buildGames flatRows
+
+getGameWithSessions :: (WithDb env m, WithError m) => GameID -> m Game
+getGameWithSessions gameId = do
+    let sql =
+            "SELECT g.id, g.name, g.system, s.start_time, s.end_time, s.name \
+            \FROM games g \
+            \LEFT JOIN sessions s ON g.id = s.game_id \
+            \WHERE g.id = ?"
+
+    asSingleRow $ buildGames <$> queryWith parseGameJoinRow sql (Only gameId)
 
 -- Parse a row of the query
 parseGameJoinRow :: RowParser (GameID, Text, Text, Maybe Session)

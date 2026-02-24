@@ -14,3 +14,10 @@ executeFile :: (WithDb env m) => FilePath -> m ()
 executeFile path = do
     sqlStatements <- readFileBS path
     executeRaw $ Query sqlStatements
+
+-- | prepareDB gets the database setup for testing
+prepareDB :: (WithDb env m) => m ()
+prepareDB = teardownDb >> setupDB
+
+teardownDb :: (WithDb env m) => m ()
+teardownDb = executeFile "sql/drop.sql"
