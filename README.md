@@ -1,3 +1,3 @@
 # Initiative
 
-Organise TTRPG groups and find timeslots for games.
+Organise TTRPG groups and find time slots for games.
