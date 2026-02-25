@@ -48,12 +48,5 @@
           inputsFrom = [ pkgs.haskellPackages.initiative.env ];
           packages = with pkgs; [ postgresql ];
         };
-
-        hydraJobs = {
-
-          image = packages.dockerImage;
-
-          tests = pkgs.haskellPackages.initiative;
-        };
       });
 }
