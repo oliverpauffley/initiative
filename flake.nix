@@ -5,13 +5,13 @@
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, utils, ... }:
+  outputs = { nixpkgs, utils, self, ... }:
     utils.lib.eachDefaultSystem (system:
       let
         config = { };
 
         overlay = pkgsNew: pkgsOld: {
-          spire = pkgsNew.haskell.lib.justStaticExecutables
+          initiative = pkgsNew.haskell.lib.justStaticExecutables
             pkgsNew.haskellPackages.initiative;
 
           haskellPackages = pkgsOld.haskellPackages.override (old: {
@@ -31,12 +31,13 @@
         apps.default = {
           type = "app";
 
-          program = "${pkgs.spire}/bin/initiative";
+          program = "${pkgs.initiative}/bin/initiative";
         };
 
         devShells.default = pkgs.mkShell {
           inputsFrom = [ pkgs.haskellPackages.initiative.env ];
           packages = with pkgs; [ postgresql ];
         };
+        hydraJobs = { inherit (self) initiative; };
       });
 }
