@@ -12,7 +12,7 @@
     "inputs": {
         "src": {
             "type": "git",
-            "value": "github.com/oliverpauffley/initiative.git",
+            "value": "https://github.com/oliverpauffley/initiative.git",
             "emailresponsible": false
         },
         "nixpkgs": {
