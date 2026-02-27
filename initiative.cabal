@@ -136,7 +136,7 @@ test-suite initiative-unit-tests
       , hspec-core
 
 
-test-suite initiative-integration-tests
+executable initiative-integration-tests
     import:           common-options
     default-language: Haskell2010
     other-modules:    Test.Server

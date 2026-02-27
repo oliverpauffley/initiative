@@ -4,7 +4,8 @@ let
   pkgs = import nixpkgs { };
   hlib = pkgs.haskell.lib;
   initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
-  build-integration = hlib.overrideCabal initiative (old: { checkPhase = ""; });
+  initiative-integration =
+    hlib.overrideCabal initiative (old: { checkPhase = ""; });
 
 in rec {
 
@@ -24,12 +25,6 @@ in rec {
           host  all all 127.0.0.1/32 trust
         '';
       };
-      environment.systemPackages = with pkgs; [
-        cabal-install
-        build-integration
-        ghc
-      ];
-
     };
 
     testScript = ''
@@ -37,8 +32,7 @@ in rec {
       machine.wait_for_open_port(5432)
 
       machine.succeed(
-        "cd ${src} && "
-        "cabal test all --builddir=/tmp/dist 2>&1"
+        "${initiative-integration}/bin/initative-integration-tests"
       )
     '';
   };

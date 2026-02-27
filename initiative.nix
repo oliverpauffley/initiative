@@ -14,13 +14,12 @@ mkDerivation {
     http-types lens mtl postgresql-simple relude resource-pool servant
     servant-client servant-server text time tomland wai wai-extra warp
   ];
-  executableHaskellDepends = [ base relude ];
-  executablePkgconfigDepends = [ zlib ];
-  testHaskellDepends = [
-    base hedgehog hspec hspec-core mtl relude resource-pool
+  executableHaskellDepends = [
+    base hspec hspec-core mtl relude resource-pool
   ];
+  executablePkgconfigDepends = [ zlib ];
+  testHaskellDepends = [ base hedgehog hspec hspec-core mtl relude ];
   doHaddock = false;
   description = "Organizing TTRPG and other similar groups to find timeslots for games";
   license = lib.licenses.bsd3;
-  mainProgram = "initiative";
 }
