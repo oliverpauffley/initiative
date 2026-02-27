@@ -9,7 +9,7 @@ let
     inherit description;
     nixexprinput = "src";
     nixexprpath = "hydra-jobs.nix";
-    checkinterval = 300;
+    checkinterval = 86400;
     schedulingshares = shares;
     enableemail = false;
     emailoverride = "";

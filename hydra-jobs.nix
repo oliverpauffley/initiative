@@ -7,7 +7,7 @@ let
     hlib.overrideCabal (pkgs.haskellPackages.callPackage ./initiative.nix { })
     (old: {
       postInstall = ''
-        cp -r $src/sql $out/bin/sql
+        cp -r $src/sql $out/sql
       '';
     });
   initiative-integration =
