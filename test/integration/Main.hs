@@ -4,7 +4,6 @@ import Control.Exception (bracket)
 import qualified Data.Pool as Pool
 import GHC.IO.Encoding (utf8)
 import GHC.IO.Handle (hSetEncoding)
-import Hedgehog (Group, checkParallel)
 import Lib (mkAppEnv)
 import Lib.App (AppEnv)
 import Lib.App.Env (Env (..))
@@ -32,15 +31,10 @@ main =
 
         hspec $ hspecTests env
 
--- ifM (checkParallel hedgehogTests) exitSuccess exitFailure
-
 hspecTests :: AppEnv -> Spec
 hspecTests =
     sequential
         . joinSpecs
-            "Initiative"
+            "Initiative Integration Tests"
             [ serverSpecs
             ]
-
--- hedgehogTests :: Group
--- hedgehogTests = undefined
