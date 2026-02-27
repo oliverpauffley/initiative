@@ -38,6 +38,7 @@ in rec {
       machine.wait_for_open_port(5432)
 
       machine.succeed(
+        "cd ${src} && "
         "cabal test all 2>&1"
       )
     '';
