@@ -4,6 +4,8 @@ let
   pkgs = import nixpkgs { };
   hlib = pkgs.haskell.lib;
   initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
+  build-integration = hlib.overrideCabal initiative (old: { checkPhase = ""; });
+
 in rec {
   build = hlib.overrideCabal initiative
     (old: { testTarget = "initiative-unit-tests"; });
@@ -23,9 +25,12 @@ in rec {
           local all all trust
           host  all all 127.0.0.1/32 trust
         '';
+        environment.systemPackages = with pkgs; [
+          cabal-install
+          build-integration
+        ];
       };
 
-      inputsFrom = [ initiative ];
     };
 
     testScript = ''
