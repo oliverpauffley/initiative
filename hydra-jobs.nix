@@ -27,6 +27,7 @@ in rec {
       environment.systemPackages = with pkgs; [
         cabal-install
         build-integration
+        ghc
       ];
 
     };
