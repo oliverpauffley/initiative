@@ -16,8 +16,8 @@
             "emailresponsible": false
         },
         "nixpkgs": {
-            "type": "github",
-            "value": "NixOS/nixpkgs release-25.05",
+            "type": "git",
+            "value": "https://github.com/NixOS/nixpkgs release-25.05",
             "emailresponsible": false
         }
     }
