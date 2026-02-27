@@ -25,11 +25,11 @@ in rec {
           local all all trust
           host  all all 127.0.0.1/32 trust
         '';
-        environment.systemPackages = with pkgs; [
-          cabal-install
-          build-integration
-        ];
       };
+      environment.systemPackages = with pkgs; [
+        cabal-install
+        build-integration
+      ];
 
     };
 
