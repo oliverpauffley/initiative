@@ -4,8 +4,13 @@ let
   pkgs = import nixpkgs { };
   hlib = pkgs.haskell.lib;
   initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
-  initiative-integration =
-    hlib.overrideCabal initiative (old: { checkPhase = ""; });
+  initiative-integration = hlib.overrideCabal initiative (old: {
+    checkPhase = "";
+    postInstall = ''
+      cp -r $src/sql $out/sql
+    '';
+
+  });
 
 in rec {
 
