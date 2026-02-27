@@ -31,7 +31,8 @@ main =
         runAppLogIO_ env prepareDB
 
         hspec $ hspecTests env
-        ifM (checkParallel hedgehogTests) exitSuccess exitFailure
+
+-- ifM (checkParallel hedgehogTests) exitSuccess exitFailure
 
 hspecTests :: AppEnv -> Spec
 hspecTests =
@@ -41,5 +42,5 @@ hspecTests =
             [ serverSpecs
             ]
 
-hedgehogTests :: Group
-hedgehogTests = undefined
+-- hedgehogTests :: Group
+-- hedgehogTests = undefined
