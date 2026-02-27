@@ -19,6 +19,11 @@
             "type": "git",
             "value": "https://github.com/NixOS/nixpkgs release-25.05",
             "emailresponsible": false
+        },
+        "pulls": {
+            "type": "githubpulls",
+            "value": "oliverpauffley initiative",
+            "emailresponsible": false
         }
     }
 }
