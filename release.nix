@@ -1,17 +1,16 @@
 { nixpkgs, pulls, ... }:
-
 let
   pkgs = import nixpkgs { };
-
   prs = builtins.fromJSON (builtins.readFile pulls);
-  mkJobset = branch: {
+
+  mkJobset = { branch, description, shares ? 100 }: {
     enabled = 1;
     hidden = false;
-    description = "Build ${branch}";
+    inherit description;
     nixexprinput = "src";
     nixexprpath = "hydra-jobs.nix";
     checkinterval = 300;
-    schedulingshares = 100;
+    schedulingshares = shares;
     enableemail = false;
     emailoverride = "";
     keepnr = 3;
@@ -26,9 +25,9 @@ let
         value = "https://github.com/NixOS/nixpkgs release-25.05";
         emailresponsible = false;
       };
-
     };
   };
+
   prJobsets = pkgs.lib.mapAttrs (num: info:
     mkJobset {
       branch = "pull/${num}/head";
@@ -36,11 +35,12 @@ let
       shares = 20;
     }) prs;
 
-in {
-  jobsets = pkgs.writeText "jobsets.json" (builtins.toJSON (prJobsets // {
+  allJobsets = prJobsets // {
     main = mkJobset {
       branch = "main";
       description = "Build main";
     };
-  }));
-}
+  };
+
+  jobsetsJson = builtins.toJSON allJobsets;
+in { jobsets = pkgs.writeText "jobsets.json" jobsetsJson; }
