@@ -7,8 +7,6 @@ let
   build-integration = hlib.overrideCabal initiative (old: { checkPhase = ""; });
 
 in rec {
-  build = hlib.overrideCabal initiative
-    (old: { testTarget = "initiative-unit-tests"; });
 
   integration-tests = pkgs.nixosTest {
     name = "initiative-integration-tests";
@@ -39,8 +37,11 @@ in rec {
 
       machine.succeed(
         "cd ${src} && "
-        "cabal test all 2>&1"
+        "cabal test all --builddir=/tmp/dist 2>&1"
       )
     '';
   };
+
+  build = hlib.overrideCabal initiative
+    (old: { testTarget = "initiative-unit-tests"; });
 }
