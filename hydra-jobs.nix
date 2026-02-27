@@ -34,12 +34,12 @@ in rec {
     };
 
     testScript = ''
-            machine.wait_for_unit("postgresql.service")
-            machine.wait_for_open_port(5432)
+      machine.wait_for_unit("postgresql.service")
+      machine.wait_for_open_port(5432)
 
       machine.succeed(
-              "cabal test all 2>&1"
-            )
+        "cabal test all 2>&1"
+      )
     '';
   };
 }
