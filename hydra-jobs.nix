@@ -32,7 +32,7 @@ in rec {
       machine.wait_for_open_port(5432)
 
       machine.succeed(
-        "${initiative-integration}/bin/initative-integration-tests"
+        "${initiative-integration}/bin/initiative-integration-tests"
       )
     '';
   };

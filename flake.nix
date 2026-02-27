@@ -16,8 +16,7 @@
           haskellPackages = pkgsOld.haskellPackages.override (old: {
             overrides = hself: hsuper: {
               initiative = pkgsNew.haskell.lib.overrideCabal
-                (hself.callPackage ./initiative.nix { })
-                (drv: { testTarget = "initiative-unit-tests"; });
+                (hself.callPackage ./initiative.nix { }) (drv: { });
             };
           });
         };
