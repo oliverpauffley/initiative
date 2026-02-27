@@ -6,5 +6,6 @@ let
 in {
 
   initiative =
-    hlib.disableCheck (pkgs.haskellPackages.callPackage ./initiative.nix { });
+    hlib.overrideCabal (pkgs.haskellPackages.callPackage ./initiative.nix { })
+    (old: { testTarget = "initiative-unit-tests"; });
 }
