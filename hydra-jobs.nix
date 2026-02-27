@@ -13,6 +13,7 @@ let
 in rec {
   build = hlib.overrideCabal initiative
     (old: { testTarget = "initiative-unit-tests"; });
+
   integration-tests = pkgs.nixosTest {
     name = "initiative-integration-tests";
 
