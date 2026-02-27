@@ -8,7 +8,7 @@ import Lib.Db (executeRaw)
 import Lib.Db.Functions (WithDb)
 
 setupDB :: (WithDb env m) => m ()
-setupDB = executeFile "sql/schema.sql"
+setupDB = executeFile "./sql/schema.sql"
 
 executeFile :: (WithDb env m) => FilePath -> m ()
 executeFile path = do
@@ -20,4 +20,4 @@ prepareDB :: (WithDb env m) => m ()
 prepareDB = teardownDb >> setupDB
 
 teardownDb :: (WithDb env m) => m ()
-teardownDb = executeFile "sql/drop.sql"
+teardownDb = executeFile "./sql/drop.sql"
