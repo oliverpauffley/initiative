@@ -4,12 +4,6 @@ let
   pkgs = import nixpkgs { };
   hlib = pkgs.haskell.lib;
   initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
-  # build a version of initiative to run the integration tests
-  integrationTestBinary = hlib.overrideCabal initiative (old: {
-    testTarget = "initiative-integration-tests";
-    doCheck = false;
-  });
-
 in rec {
   build = hlib.overrideCabal initiative
     (old: { testTarget = "initiative-unit-tests"; });
@@ -31,16 +25,16 @@ in rec {
         '';
       };
 
-      environment.systemPackages = [ integrationTestBinary ];
+      inputsFrom = [ initiative ];
     };
 
     testScript = ''
-      machine.wait_for_unit("postgresql.service")
-      machine.wait_for_open_port(5432)
+            machine.wait_for_unit("postgresql.service")
+            machine.wait_for_open_port(5432)
 
       machine.succeed(
-        "${integrationTestBinary}/bin/integration-tests"
-      )
+              "cabal test all 2>&1"
+            )
     '';
   };
 }
