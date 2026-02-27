@@ -4,7 +4,7 @@ let
   pkgs = import nixpkgs { };
   hlib = pkgs.haskell.lib;
   initiative =
-    hlib.overrideCabal (pkgs.haskellPackages.callPackage ./initiative.nix)
+    hlib.overrideCabal (pkgs.haskellPackages.callPackage ./initiative.nix { })
     (old: {
       postInstall = ''
         cp -r $src/sql $out/bin/sql
