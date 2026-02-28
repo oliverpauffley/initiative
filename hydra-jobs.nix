@@ -17,10 +17,7 @@ in rec {
     nodes.machine = { config, pkgs, ... }: {
       services.postgresql = {
         enable = true;
-        ensureUsers = [{
-          name = "initiative";
-          ensureDBOwnership = true;
-        }];
+        ensureUsers = [{ name = "initiative"; }];
         authentication = ''
           local all all              trust
           host  all all 127.0.0.1/32 trust
