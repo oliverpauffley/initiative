@@ -28,7 +28,7 @@ in rec {
         initialScript = pkgs.writeText "initialScript.sql" ''
           create role ${role} nologin;
 
-          create role ${username} noinherit login password '${password}';
+          create role ${username} inherit login password '${password}';
           grant ${role} to ${username};
         '';
       };
