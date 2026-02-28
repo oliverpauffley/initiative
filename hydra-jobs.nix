@@ -4,6 +4,10 @@ let
   pkgs = import nixpkgs { };
   hlib = pkgs.haskell.lib;
   initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
+
+  role = "dev";
+  username = "dev";
+  password = "dev-password";
 in rec {
 
   integration-tests = pkgs.nixosTest {
@@ -20,6 +24,12 @@ in rec {
         authentication = ''
           local all all trust
           host  all all 127.0.0.1/32 trust
+        '';
+        initialScript = pkgs.writeText "initialScript.sql" ''
+          create role ${role} nologin;
+
+          create role ${username} noinherit login password '${password}';
+          grant ${role} to ${username};
         '';
       };
     };
