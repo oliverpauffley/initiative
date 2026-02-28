@@ -17,7 +17,6 @@ in rec {
     nodes.machine = { config, pkgs, ... }: {
       services.postgresql = {
         enable = true;
-        ensureDatabases = [ "initiative" ];
         ensureUsers = [{
           name = "initiative";
           ensureDBOwnership = true;
@@ -34,6 +33,7 @@ in rec {
           create role ${username} inherit login password '${password}';
           grant ${role} to ${username};
 
+          create database ${schema}";
           \connect initiative
           grant all on schema public to ${role};
         '';
