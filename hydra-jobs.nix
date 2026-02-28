@@ -6,6 +6,7 @@ let
   initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
 
   role = "dev_role";
+  schema = "initiative";
   username = "dev";
   password = "dev-password";
 in rec {
@@ -27,6 +28,7 @@ in rec {
           host  all all ::1/128       trust
         '';
         initialScript = pkgs.writeText "initialScript.sql" ''
+          create schema ${schema};
           create role ${role} nologin;
 
           create role ${username} inherit login password '${password}';
