@@ -30,7 +30,7 @@ in rec {
           create role ${username} inherit login password '${password}';
           grant ${role} to ${username};
 
-          create database ${schema}";
+          create database ${schema};
           \connect initiative
           grant all on schema public to ${role};
         '';
