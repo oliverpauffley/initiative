@@ -47,5 +47,5 @@ in rec {
     '';
   };
 
-  build = hlib.overrideCabal initiative;
+  build = initiative;
 }
