@@ -15,6 +15,7 @@ in rec {
         ensureDatabases = [ "initiative" ];
         ensureUsers = [{
           name = "initiative";
+          password = "dev-password";
           ensureDBOwnership = true;
         }];
         authentication = ''

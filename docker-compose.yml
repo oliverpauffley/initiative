@@ -4,7 +4,6 @@ services:
     image: postgres
     environment:
       POSTGRES_USER: "dev"
-      POSTGRES_PASSWORD: "dev-password"
       PGDATA: /data/postgres
       POSTGRES_DB: initiative
     volumes:
