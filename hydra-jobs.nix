@@ -5,7 +5,7 @@ let
   hlib = pkgs.haskell.lib;
   initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
 
-  role = "dev";
+  role = "dev_role";
   username = "dev";
   password = "dev-password";
 in rec {
@@ -22,8 +22,9 @@ in rec {
           ensureDBOwnership = true;
         }];
         authentication = ''
-          local all all trust
+          local all all              trust
           host  all all 127.0.0.1/32 trust
+          host  all all ::1/128       trust
         '';
         initialScript = pkgs.writeText "initialScript.sql" ''
           create role ${role} nologin;
