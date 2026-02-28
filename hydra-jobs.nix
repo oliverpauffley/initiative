@@ -31,6 +31,9 @@ in rec {
 
           create role ${username} inherit login password '${password}';
           grant ${role} to ${username};
+
+          \connect initiative
+          grant all on schema public to ${role};
         '';
       };
     };
