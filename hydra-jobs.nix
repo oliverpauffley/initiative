@@ -3,16 +3,7 @@
 let
   pkgs = import nixpkgs { };
   hlib = pkgs.haskell.lib;
-  initiative =
-    hlib.overrideCabal (pkgs.haskellPackages.callPackage ./initiative.nix { })
-    (old: {
-      postInstall = ''
-        cp -r $src/sql $out/sql
-      '';
-    });
-  initiative-integration =
-    hlib.overrideCabal initiative (old: { checkPhase = ""; });
-
+  initiative = pkgs.haskellPackages.callPackage ./initiative.nix { };
 in rec {
 
   integration-tests = pkgs.nixosTest {
@@ -38,11 +29,10 @@ in rec {
       machine.wait_for_open_port(5432)
 
       machine.succeed(
-        "${initiative-integration}/bin/initiative-integration-tests"
+        "${initiative}/bin/initiative-integration-tests"
       )
     '';
   };
 
-  build = hlib.overrideCabal initiative
-    (old: { testTarget = "initiative-unit-tests"; });
+  build = hlib.overrideCabal initiative;
 }
