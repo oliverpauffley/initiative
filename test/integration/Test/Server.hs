@@ -3,7 +3,8 @@ module Test.Server where
 import Lib.App (AppEnv)
 import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (NewGameRequest))
 import Lib.Db.Functions (WithDb, singleRowError)
-import Lib.Server (Site (getGame), getAllGamesHandler, getGameHandler, postNewGameHandler)
+import Lib.Server
+import Lib.Server.Game
 import Test.Assert (equals, failsWith)
 import Test.Common (joinSpecs)
 import Test.Hspec.Core.Spec
