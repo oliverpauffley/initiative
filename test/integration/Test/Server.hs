@@ -1,11 +1,14 @@
 module Test.Server where
 
 import Lib.App (AppEnv)
+import Lib.App.Env ()
 import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (NewGameRequest))
+import Lib.Core.Player (Email (..), NewPlayerRequest (..), PlayerID (PlayerID))
 import Lib.Db.Functions (WithDb, singleRowError)
 import Lib.Server
+import Lib.Server.Auth (AuthRoutes (addNewUser), addNewUserHandler, loginHandler)
 import Lib.Server.Game
-import Test.Assert (equals, failsWith)
+import Test.Assert (equals, failsWith, succeeds)
 import Test.Common (joinSpecs)
 import Test.Hspec.Core.Spec
 
@@ -13,7 +16,9 @@ serverSpecs :: AppEnv -> Spec
 serverSpecs =
     joinSpecs
         "Api"
-        [gamesSpec]
+        [ gamesSpec
+        , authSpec
+        ]
 
 gamesSpec :: AppEnv -> Spec
 gamesSpec env = describe "Games" $ do
@@ -36,3 +41,10 @@ gamesSpec env = describe "Games" $ do
             , Game (GameID 2) "test-game-2" "test-system-2" []
             ]
             env
+
+authSpec :: AppEnv -> Spec
+authSpec env = describe "Auth" $ do
+    it "should return a 404 error when user is unknown" $
+        env & loginHandler "unknownemail" `failsWith` singleRowError
+    it "should return the player ID for a known player" $
+        env & equals (addNewUserHandler (NewPlayerRequest "player name" (Email "player email")) >> loginHandler "player email") (PlayerID 1)

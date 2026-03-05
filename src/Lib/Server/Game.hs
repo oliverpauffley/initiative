@@ -9,6 +9,7 @@ import Lib.Effects.Log (WithLog)
 import Lib.Server.Common (AppServer)
 import Servant (Capture, Get, JSON, Post, ReqBody, (:-), (:>))
 
+-- TODO all need to be behind auth.
 data GameRoutes route = GameRoutes
     { getAllGames ::
         route :- Get '[JSON] [Game]

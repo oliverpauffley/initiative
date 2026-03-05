@@ -17,20 +17,22 @@ newtype Email = Email
     { unEmail :: Text
     }
     deriving stock (Show, Generic)
+    deriving anyclass (ToRow, FromRow)
     deriving newtype (Eq, Ord, Hashable, FromField, ToField, FromJSON, ToJSON)
-
--- | Identify the auth provider of oauth. Apparently there is a risk to not tracking the auth provider since we want to track the email provider with it's auth pair.
-data AuthProviders = Google
-    deriving stock (Generic, Show, Eq)
-
--- deriving newtype (ToField, FromField, FromJSON, ToJSON)
 
 data Player = Player
     { playerID :: !PlayerID
     , playerName :: !Text
     , playerEmail :: !Email
-    -- , playerAuthProvider :: AuthProviders
     }
     deriving stock (Generic, Show, Eq)
     deriving anyclass (ToRow, FromRow)
     deriving (FromJSON, ToJSON)
+
+data NewPlayerRequest = NewPlayerRequest
+    { newPlayerName :: !Text
+    , newPlayerEmail :: !Email
+    }
+    deriving stock (Eq, Show, Generic)
+    deriving anyclass (ToRow)
+    deriving (FromJSON)
