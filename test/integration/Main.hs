@@ -10,7 +10,7 @@ import GHC.IO.Handle (hSetEncoding)
 import Lib (mkAppEnv)
 import Lib.App (AppEnv)
 import Lib.App.Env (Env (..))
-import Lib.Config (Config (..))
+import Lib.Config (Config (..), OAuthConfig (..))
 import Lib.Db.Schema (prepareDB)
 import Lib.Effects.Log (runAppLogIO_)
 import Test.Common
@@ -20,7 +20,7 @@ import Test.Server
 main :: IO ()
 main =
     bracket
-        (mkAppEnv $ Config "host=localhost port=5432 user=dev dbname=initiative password=dev-password" Log.Debug)
+        (mkAppEnv $ Config "host=localhost port=5432 user=dev dbname=initiative password=dev-password" Log.Debug (OAuthConfig "" "" "http://localhost/callback" "http://localhost/callback" "http://localhost/userinfo"))
         (\Env{..} -> Pool.destroyAllResources envDbPool)
         runTests
   where

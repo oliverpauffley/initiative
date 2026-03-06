@@ -1,2 +1,9 @@
 dbCredentials = "host=localhost port=5432 user=dev dbname=initiative password=dev-password"
 log.severity  = "Debug"
+
+[oauth-google]
+  name         = "servant-oauth2-example-basic"
+  callback_url   = "http://localhost:8080/auth/google/complete"
+  user_info_url  = "https://www.googleapis.com/oauth2/v2/userinfo"
+  id           = "..."
+  secret       = "..."

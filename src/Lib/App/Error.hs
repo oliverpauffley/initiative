@@ -22,6 +22,7 @@ module Lib.App.Error (
     headerDecodeError,
     dbError,
     limitError,
+    redirect,
 
     -- * Error throwing helpers
     throwOnNothing,
@@ -33,8 +34,8 @@ module Lib.App.Error (
 import Control.Monad.Except (MonadError)
 import Data.CaseInsensitive (foldedCase)
 import GHC.Stack (SrcLoc (SrcLoc, srcLocModule, srcLocStartLine))
-import Network.HTTP.Types.Header (HeaderName)
-import Servant.Server (err401, err404, err413, err417, err500, errBody)
+import Network.HTTP.Types.Header (HeaderName, hLocation)
+import Servant.Server (err302, err401, err404, err413, err417, err500, errBody, errHeaders)
 
 import qualified Control.Monad.Except as E (throwError)
 import qualified Servant.Server as Servant (ServerError)
@@ -107,6 +108,8 @@ data IError
       DbError Text
     | -- | Limits on the multi-request are overflowed.
       LimitError
+    | -- | Issue an HTTP redirect (used for OAuth login flow).
+      Redirect Text
     deriving (Show, Eq)
 
 -- | Map 'AppError' into a HTTP error code.
@@ -121,6 +124,7 @@ toHttpError (AppError _callStack errorType) = case errorType of
         HeaderDecodeError name -> err401{errBody = encodeUtf8 $ "Unable to decode header: " <> name}
         DbError e -> err500{errBody = encodeUtf8 e}
         LimitError -> err413{errBody = "Request is over the limits"}
+        Redirect url -> err302{errHeaders = [(hLocation, encodeUtf8 url)]}
 
 --    MobileAppError err -> let errMsg = Proto.ErrorResponse err mempty in
 --        err400 { errBody = fromStrict $ encodeMessage errMsg }
@@ -189,6 +193,9 @@ dbError = InternalError . DbError
 
 limitError :: AppErrorType
 limitError = InternalError LimitError
+
+redirect :: Text -> AppErrorType
+redirect = InternalError . Redirect
 
 ----------------------------------------------------------------------------
 -- Helpers

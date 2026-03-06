@@ -1,37 +1,24 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE PatternSynonyms #-}
-
 module Lib.Server where
 
-import Colog (log, pattern D, pattern I)
-import Data.Aeson (FromJSON)
-import Lib.App (WithError)
-import Lib.App.Monad (App, AppEnv)
-import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (..))
-import Lib.Db (WithDb, getGameWithSessions)
-import Lib.Db.Game (getGamesWithSessions, insertGame)
-import Lib.Effects.Log (WithLog, runAppAsHandler)
-import Servant (Application, Capture, Get, JSON, Post, ReqBody, serve, (:-), (:<|>), (:>))
+import Lib.App.Monad (AppEnv)
+import Lib.Effects.Log (runAppAsHandler)
+import Lib.Server.Auth (AuthRoutes, authServer)
+import Lib.Server.Common (AppServer)
+import Lib.Server.Game (GameRoutes (..), gameServer)
+import Servant (Application, NamedRoutes, serve, (:-), (:>))
 import Servant.API.Generic (ToServantApi, toServant)
 import Servant.Server (Server, hoistServer)
-import Servant.Server.Generic (AsServerT)
 
 type ToApi (site :: Type -> Type) = ToServantApi site
 
 -- Server type level api
-type Api = ToApi Site
-type AppServer = AsServerT App
+type Api = ToApi InitiativeApi
 
-data Site route = Site
-    { getAllGames ::
-        route
-            :- "games" :> Get '[JSON] [Game]
-    , getGame :: route :- "games" :> Capture "gameID" Int :> Get '[JSON] Game
-    , postNewGame ::
-        route
-            :- "games" :> ReqBody '[JSON] NewGameRequest :> Post '[JSON] Game
+data InitiativeApi route = InitiativeApi
+    { games :: route :- "games" :> NamedRoutes GameRoutes
+    , auth :: route :- "auth" :> NamedRoutes AuthRoutes
     }
-    deriving (Generic)
+    deriving stock (Generic)
 
 server :: AppEnv -> Server Api
 server env =
@@ -46,22 +33,9 @@ application env =
         (Proxy @Api)
         (server env)
 
-apiServer :: Site AppServer
+apiServer :: InitiativeApi AppServer
 apiServer =
-    Site
-        { getAllGames = getAllGamesHandler
-        , getGame = getGameHandler
-        , postNewGame = postNewGameHandler
+    InitiativeApi
+        { games = gameServer
+        , auth = authServer
         }
-
-getAllGamesHandler :: (WithDb env m, WithError m, WithLog env m) => m [Game]
-getAllGamesHandler = do
-    getGamesWithSessions
-
-getGameHandler :: (WithDb env m, WithError m, WithLog env m) => Int -> m Game
-getGameHandler gID = getGameWithSessions (GameID gID)
-
-postNewGameHandler :: (WithDb env m, WithError m, WithLog env m) => NewGameRequest -> m Game
-postNewGameHandler r'@NewGameRequest{..} = do
-    gID <- insertGame r'
-    return $ Game gID newGameName newGameSystem []
