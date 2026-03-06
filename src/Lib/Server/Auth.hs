@@ -22,7 +22,7 @@ import Network.OAuth.OAuth2.TokenRequest (fetchAccessToken)
 import Servant hiding (throwError)
 import URI.ByteString (Absolute, URIRef, serializeURIRef')
 
--- | Subset of Google userinfo response
+-- | We only want the user email from this request
 newtype GoogleUser = GoogleUser {googleEmail :: Text}
 
 instance FromJSON GoogleUser where
@@ -30,12 +30,12 @@ instance FromJSON GoogleUser where
         GoogleUser <$> o .: "email"
 
 data AuthRoutes route = AuthRoutes
-    { googleLogin ::
-        route :- "google" :> "login" :> Get '[JSON] NoContent
-    , googleComplete ::
+    { login ::
+        route :- "oauth" :> "login" :> Get '[JSON] NoContent
+    , callback ::
         route
-            :- "google"
-                :> "complete"
+            :- "oauth"
+                :> "callback"
                 :> QueryParam "code" Text
                 :> Get '[JSON] SessionToken
     , logout ::
@@ -52,18 +52,18 @@ data AuthRoutes route = AuthRoutes
     }
     deriving stock (Generic)
 
-googleLoginHandler ::
+loginHandler ::
     ( WithAuth env m
     , Has OAuth2 env
     ) =>
     m NoContent
-googleLoginHandler = do
+loginHandler = do
     oauth <- grab @OAuth2
     let uri = authorizationUrlWithParams [("scope", "openid email profile")] oauth
         uriText = decodeUtf8 $ serializeURIRef' uri
     throwError $ redirect uriText
 
-googleCompleteHandler ::
+callbackHandler ::
     ( WithAuth env m
     , Has OAuth2 env
     , Has Manager env
@@ -71,16 +71,22 @@ googleCompleteHandler ::
     ) =>
     Maybe Text ->
     m SessionToken
-googleCompleteHandler Nothing = throwError $ invalid "Missing 'code' query parameter"
-googleCompleteHandler (Just code) = do
+callbackHandler Nothing = throwError $ invalid "Missing 'code' query parameter"
+callbackHandler (Just code) = do
     oauth <- grab @OAuth2
     mgr <- grab @Manager
     userInfoUri <- grab @(URIRef Absolute)
-    oauthToken <- liftOAuth show "Token exchange failed" $
-        fetchAccessToken mgr oauth (ExchangeToken code)
-    GoogleUser{..} <- liftOAuth decodeUtf8 "Userinfo request failed" $
-        authGetJSON mgr (accessToken oauthToken) userInfoUri
+    -- exchange authorization code for access token
+    oauthToken <-
+        liftOAuth show "Token exchange failed" $
+            fetchAccessToken mgr oauth (ExchangeToken code)
+    -- use the token to get user information (email)
+    GoogleUser{..} <-
+        liftOAuth decodeUtf8 "Userinfo request failed" $
+            authGetJSON mgr (accessToken oauthToken) userInfoUri
+    -- check the player is in the db
     player <- getPlayer (Email googleEmail)
+    -- create a session token
     createSession (playerID player)
 
 -- | Run an ExceptT IO action, converting the Left case into a server error.
@@ -111,8 +117,8 @@ addNewUserHandler mHeader req = do
 authServer :: AuthRoutes AppServer
 authServer =
     AuthRoutes
-        { googleLogin = googleLoginHandler
-        , googleComplete = googleCompleteHandler
+        { login = loginHandler
+        , callback = callbackHandler
         , logout = logoutHandler
         , addNewUser = addNewUserHandler
         }
