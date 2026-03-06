@@ -8,6 +8,9 @@ module Lib.App.Env (
 import Colog (HasLog (..), LogAction, Message)
 import Data.Pool (Pool)
 import Database.PostgreSQL.Simple (Connection)
+import Network.HTTP.Client (Manager)
+import Network.OAuth.OAuth2 (OAuth2)
+import URI.ByteString (Absolute, URIRef)
 
 -- Type alias for postgresconnection
 type DbPool = Pool Connection
@@ -15,6 +18,9 @@ type DbPool = Pool Connection
 data Env (m :: Type -> Type) = Env
     { envDbPool :: !DbPool
     , envLogAction :: !(LogAction m Message)
+    , envHttpManager :: !Manager
+    , envOAuth :: !OAuth2
+    , envUserInfoUri :: !(URIRef Absolute)
     }
 
 instance HasLog (Env m) Message m where
@@ -31,6 +37,9 @@ class Has field env where
 
 instance Has DbPool (Env m) where obtain = envDbPool
 instance Has (LogAction m Message) (Env m) where obtain = envLogAction
+instance Has Manager (Env m) where obtain = envHttpManager
+instance Has OAuth2 (Env m) where obtain = envOAuth
+instance Has (URIRef Absolute) (Env m) where obtain = envUserInfoUri
 
 grab :: forall field env m. (MonadReader env m, Has field env) => m field
 grab = asks $ obtain @field

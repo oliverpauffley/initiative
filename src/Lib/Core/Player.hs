@@ -24,6 +24,7 @@ data Player = Player
     { playerID :: !PlayerID
     , playerName :: !Text
     , playerEmail :: !Email
+    , playerIsAdmin :: !Bool
     }
     deriving stock (Generic, Show, Eq)
     deriving anyclass (ToRow, FromRow)

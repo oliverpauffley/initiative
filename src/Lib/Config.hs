@@ -12,6 +12,7 @@ data OAuthConfig = OAuthConfig
     , oId :: !Text
     , oSecret :: !Text
     , oCallbackUrl :: !Text
+    , oUserInfoUrl :: !Text
     }
 
 -- | Data type for the configurable elements of the application
@@ -28,6 +29,7 @@ oauthConfigCodec =
         <*> Toml.diwrap (Toml.text "id") .= oId
         <*> Toml.diwrap (Toml.text "secret") .= oSecret
         <*> Toml.diwrap (Toml.text "callback_url") .= oCallbackUrl
+        <*> Toml.diwrap (Toml.text "user_info_url") .= oUserInfoUrl
 
 -- | TOML codec for the 'Config' data type.
 configT :: TomlCodec Config

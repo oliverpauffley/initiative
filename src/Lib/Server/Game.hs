@@ -1,35 +1,34 @@
 -- | Endpoints for creating and editing games.
 module Lib.Server.Game where
 
-import Lib.App (WithError)
 import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (..))
-import Lib.Db (WithDb, getGameWithSessions, insertGame)
+import Lib.Db (getGameWithSessions, insertGame)
 import Lib.Db.Game (getGamesWithSessions)
-import Lib.Effects.Log (WithLog)
-import Lib.Server.Common (AppServer)
-import Servant (Capture, Get, JSON, Post, ReqBody, (:-), (:>))
+import Lib.Server.Common (AppServer, WithAuth, requireSession)
+import Servant (Capture, Get, Header, JSON, Post, ReqBody, (:-), (:>))
 
--- TODO all need to be behind auth.
 data GameRoutes route = GameRoutes
     { getAllGames ::
-        route :- Get '[JSON] [Game]
-    , getGame :: route :- Capture "gameID" Int :> Get '[JSON] Game
+        route :- Header "X-Session-Token" Text :> Get '[JSON] [Game]
+    , getGame ::
+        route :- Header "X-Session-Token" Text :> Capture "gameID" Int :> Get '[JSON] Game
     , postNewGame ::
         route
-            :- ReqBody '[JSON] NewGameRequest
+            :- Header "X-Session-Token" Text
+                :> ReqBody '[JSON] NewGameRequest
                 :> Post '[JSON] Game
     }
     deriving (Generic)
 
-getAllGamesHandler :: (WithDb env m, WithError m, WithLog env m) => m [Game]
-getAllGamesHandler = do
-    getGamesWithSessions
+getAllGamesHandler :: (WithAuth env m) => Maybe Text -> m [Game]
+getAllGamesHandler mHeader = requireSession mHeader *> getGamesWithSessions
 
-getGameHandler :: (WithDb env m, WithError m, WithLog env m) => Int -> m Game
-getGameHandler gID = getGameWithSessions (GameID gID)
+getGameHandler :: (WithAuth env m) => Maybe Text -> Int -> m Game
+getGameHandler mHeader gID = requireSession mHeader *> getGameWithSessions (GameID gID)
 
-postNewGameHandler :: (WithDb env m, WithError m, WithLog env m) => NewGameRequest -> m Game
-postNewGameHandler r'@NewGameRequest{..} = do
+postNewGameHandler :: (WithAuth env m) => Maybe Text -> NewGameRequest -> m Game
+postNewGameHandler mHeader r'@NewGameRequest{..} = do
+    _ <- requireSession mHeader
     gID <- insertGame r'
     return $ Game gID newGameName newGameSystem []
 

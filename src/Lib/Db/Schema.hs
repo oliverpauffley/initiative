@@ -31,9 +31,17 @@ setupDB =
 
 
         create TABLE IF NOT EXISTS players (
-          id SERIAL PRIMARY KEY
-        , name TEXT NOT NULL
-        , email TEXT NOT NULL
+          id       SERIAL  PRIMARY KEY
+        , name     TEXT    NOT NULL
+        , email    TEXT    NOT NULL
+        , is_admin BOOLEAN NOT NULL DEFAULT FALSE
+        );
+
+
+        create TABLE IF NOT EXISTS user_sessions (
+          token      UUID PRIMARY KEY
+        , player_id  INT  NOT NULL REFERENCES players(id) ON DELETE CASCADE
+        , expires_at TIMESTAMP WITH TIME ZONE NOT NULL
         )
 |]
 
@@ -50,6 +58,7 @@ teardownDb :: (WithDb env m) => m ()
 teardownDb =
     executeRaw
         [sql|
+        DROP TABLE IF EXISTS user_sessions;
         DROP TABLE IF EXISTS sessions;
         DROP TABLE IF EXISTS games;
         DROP TABLE IF EXISTS players;

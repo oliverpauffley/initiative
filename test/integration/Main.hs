@@ -20,7 +20,7 @@ import Test.Server
 main :: IO ()
 main =
     bracket
-        (mkAppEnv $ Config "host=localhost port=5432 user=dev dbname=initiative password=dev-password" Log.Debug (OAuthConfig "" "" "" ""))
+        (mkAppEnv $ Config "host=localhost port=5432 user=dev dbname=initiative password=dev-password" Log.Debug (OAuthConfig "" "" "http://localhost/callback" "http://localhost/callback" "http://localhost/userinfo"))
         (\Env{..} -> Pool.destroyAllResources envDbPool)
         runTests
   where

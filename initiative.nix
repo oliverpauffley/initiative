@@ -1,7 +1,8 @@
 { mkDerivation, aeson, base, case-insensitive, co-log, hedgehog
-, hoauth2, hspec, hspec-core, http-types, lens, lib, mtl
-, postgresql-simple, relude, resource-pool, servant, servant-client
-, servant-server, text, time, tomland, wai, wai-extra, warp, zlib
+, hoauth2, hspec, hspec-core, http-client, http-conduit, http-types
+, lens, lib, mtl, postgresql-simple, relude, resource-pool, servant
+, servant-client, servant-server, text, time, tomland
+, uri-bytestring, uuid, wai, wai-extra, warp, zlib
 }:
 mkDerivation {
   pname = "initiative";
@@ -11,12 +12,13 @@ mkDerivation {
   isExecutable = true;
   libraryHaskellDepends = [
     aeson base case-insensitive co-log hedgehog hoauth2 hspec
-    hspec-core http-types lens mtl postgresql-simple relude
-    resource-pool servant servant-client servant-server text time
-    tomland wai wai-extra warp
+    hspec-core http-client http-conduit http-types lens mtl
+    postgresql-simple relude resource-pool servant servant-client
+    servant-server text time tomland uri-bytestring uuid wai wai-extra
+    warp
   ];
   executableHaskellDepends = [
-    base co-log hspec hspec-core mtl relude resource-pool
+    base co-log hspec hspec-core mtl relude resource-pool uuid
   ];
   executablePkgconfigDepends = [ zlib ];
   testHaskellDepends = [ base hedgehog hspec hspec-core mtl relude ];
