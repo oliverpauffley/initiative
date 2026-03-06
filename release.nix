@@ -1,46 +1,35 @@
 { nixpkgs, pulls, ... }:
+
 let
-  pkgs = import nixpkgs { };
-  prs = builtins.fromJSON (builtins.readFile pulls);
+  lib = (import nixpkgs { system = "x86_64-linux"; }).lib;
 
   mkJobset = { branch, description, shares ? 100 }: {
     enabled = 1;
     hidden = false;
     inherit description;
-    nixexprinput = "src";
-    nixexprpath = "hydra-jobs.nix";
-    checkinterval = 86400;
+
+    type = 1;
+    flake = "github:oliverpauffley/initiative/${branch}";
+
+    checkinterval = 60;
     schedulingshares = shares;
     enableemail = false;
-    emailoverride = "";
     keepnr = 3;
-    inputs = {
-      src = {
-        type = "git";
-        value = "https://github.com/oliverpauffley/initiative.git ${branch}";
-        emailresponsible = false;
-      };
-      nixpkgs = {
-        type = "git";
-        value = "https://github.com/NixOS/nixpkgs release-25.05";
-        emailresponsible = false;
-      };
-    };
   };
 
-  prJobsets = pkgs.lib.mapAttrs (num: info:
-    mkJobset {
-      branch = "pull/${num}/head";
-      description = "PR #${num}: ${info.title}";
-      shares = 20;
-    }) prs;
-
-  allJobsets = prJobsets // {
+  mainJobset = {
     main = mkJobset {
       branch = "main";
-      description = "Build main";
+      description = "initiative – main branch";
+      shares = 200;
     };
   };
 
-  jobsetsJson = builtins.toJSON allJobsets;
-in { jobsets = pkgs.writeText "jobsets.json" jobsetsJson; }
+  prJobsets = lib.mapAttrs' (num: pr:
+    lib.nameValuePair "pr-${num}" (mkJobset {
+      branch = pr.head.ref;
+      description = "PR #${num}: ${pr.title}";
+      shares = 50;
+    })) pulls;
+
+in mainJobset // prJobsets
