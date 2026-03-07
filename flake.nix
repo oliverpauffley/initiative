@@ -101,8 +101,7 @@
               port = lib.mkOption {
                 type = lib.types.port;
                 default = 8080;
-                description =
-                  "Port the HTTP server listens on (currently hardcoded in the binary).";
+                description = "Port the HTTP server listens";
               };
             };
 
