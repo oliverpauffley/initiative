@@ -3,7 +3,7 @@
     "hidden": false,
     "description": "Jobsets",
     "nixexprinput": "src",
-    "nixexprpath": "flake.nix",
+    "nixexprpath": "release.nix",
     "checkinterval": 86400,
     "schedulingshares": 100,
     "enableemail": false,

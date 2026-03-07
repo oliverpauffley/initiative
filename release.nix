@@ -8,8 +8,21 @@ let
     hidden = false;
     inherit description;
 
-    type = 1;
-    flake = "github:oliverpauffley/initiative/${branch}";
+    type = 0;
+    nixexprinput = "initiative-src";
+    nixexprpath = "hydra-jobs.nix";
+    inputs = {
+      initiative-src = {
+        type = "git";
+        value = "https://github.com/oliverpauffley/initiative ${branch}";
+        emailresponsible = false;
+      };
+      nixpkgs = {
+        type = "git";
+        value = "https://github.com/NixOS/nixpkgs release-25.05";
+        emailresponsible = false;
+      };
+    };
 
     checkinterval = 60;
     schedulingshares = shares;
