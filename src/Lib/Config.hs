@@ -19,6 +19,7 @@ data OAuthConfig = OAuthConfig
 data Config = Config
     { cDbCredentials :: !ByteString
     , cLogSeverity :: !Severity
+    , cPort :: !Int
     , cOauthConfig :: !OAuthConfig
     }
 
@@ -37,6 +38,7 @@ configT =
     Config
         <$> Toml.byteString "dbCredentials" .= cDbCredentials
         <*> Toml.read "log.severity" .= cLogSeverity
+        <*> Toml.read "port" .= cPort
         <*> Toml.table oauthConfigCodec "oauth-google" .= cOauthConfig
 
 -- | Loads the @config.toml@ file.

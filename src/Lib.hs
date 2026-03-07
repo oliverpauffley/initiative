@@ -1,6 +1,9 @@
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module Lib where
 
 import Lib.App (AppEnv, Env (..))
+import Lib.App.Env (grab)
 import Lib.Config (Config (..), OAuthConfig (..), loadConfig)
 import Lib.Db (initialisePool)
 import Lib.Effects.Log (mainLogAction)
@@ -8,7 +11,7 @@ import Lib.Server (application)
 import Network.HTTP.Conduit (newManager, tlsManagerSettings)
 import Network.OAuth.OAuth2 (OAuth2 (..))
 import Network.Wai.Handler.Warp (run)
-import URI.ByteString (Absolute, URIRef, parseURI, strictURIParserOptions)
+import URI.ByteString (Absolute, Port (Port, portNumber), URIRef, parseURI, strictURIParserOptions)
 
 mkAppEnv :: Config -> IO AppEnv
 mkAppEnv Config{..} = do
@@ -17,6 +20,7 @@ mkAppEnv Config{..} = do
     let envLogAction = mainLogAction cLogSeverity
         envOAuth = mkGoogleOAuth cOauthConfig
         envUserInfoUri = parseUri (oUserInfoUrl cOauthConfig)
+        envPort = Port cPort
     pure Env{..}
 
 parseUri :: Text -> URIRef Absolute
@@ -35,7 +39,7 @@ mkGoogleOAuth OAuthConfig{..} =
         }
 
 runServer :: AppEnv -> IO ()
-runServer env = run 8080 $ application env
+runServer env = run ((grab @Port) env).portNumber $ application env
 
 main :: IO ()
 main = loadConfig >>= mkAppEnv >>= runServer
