@@ -19,7 +19,8 @@ data OAuthConfig = OAuthConfig
 data Config = Config
     { cDbCredentials :: !ByteString
     , cLogSeverity :: !Severity
-    , cPort :: !Int
+    , -- port for running the web server on.
+      cPort :: !Int
     , cOauthConfig :: !OAuthConfig
     }
 
