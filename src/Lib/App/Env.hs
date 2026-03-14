@@ -10,13 +10,14 @@ import Data.Pool (Pool)
 import Database.PostgreSQL.Simple (Connection)
 import Network.HTTP.Client (Manager)
 import Network.OAuth.OAuth2 (OAuth2)
-import URI.ByteString (Absolute, URIRef)
+import URI.ByteString (Absolute, Port, URIRef)
 
 -- Type alias for postgresconnection
 type DbPool = Pool Connection
 
 data Env (m :: Type -> Type) = Env
     { envDbPool :: !DbPool
+    , envPort :: !Port
     , envLogAction :: !(LogAction m Message)
     , envHttpManager :: !Manager
     , envOAuth :: !OAuth2
@@ -36,6 +37,7 @@ class Has field env where
     obtain :: env -> field
 
 instance Has DbPool (Env m) where obtain = envDbPool
+instance Has Port (Env m) where obtain = envPort
 instance Has (LogAction m Message) (Env m) where obtain = envLogAction
 instance Has Manager (Env m) where obtain = envHttpManager
 instance Has OAuth2 (Env m) where obtain = envOAuth

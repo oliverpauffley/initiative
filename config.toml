@@ -1,5 +1,6 @@
 dbCredentials = "host=localhost port=5432 user=dev dbname=initiative password=dev-password"
 log.severity  = "Debug"
+port = 8080
 
 [oauth-google]
   name         = "servant-oauth2-example-basic"
