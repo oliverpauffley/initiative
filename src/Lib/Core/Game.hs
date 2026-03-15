@@ -4,10 +4,10 @@
 module Lib.Core.Game (Game (..), Session (..), GameID (..), NewGameRequest (..)) where
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Time.Clock (UTCTime (..))
 import Database.PostgreSQL.Simple (FromRow, ToRow)
 import Database.PostgreSQL.Simple.FromField (FromField)
 import Database.PostgreSQL.Simple.ToField (ToField)
+import Lib.Core.Interval (Interval)
 
 newtype GameID = GameID {gID :: Int}
     deriving stock (Generic, Show, Eq, Ord)
@@ -34,10 +34,8 @@ data NewGameRequest = NewGameRequest
 
 -- | A session is an interval in time from start to finish. The name is optional and will be created from the attached game if unset.
 data Session = Session
-    { sessionStart :: !UTCTime
-    , sessionEnd :: !UTCTime
+    { sessionInterval :: !Interval
     , sessionName :: !(Maybe Text)
     }
     deriving stock (Generic, Show, Eq)
-    deriving anyclass (FromRow)
     deriving (FromJSON, ToJSON)

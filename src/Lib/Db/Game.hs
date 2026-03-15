@@ -7,10 +7,11 @@ import Database.PostgreSQL.Simple.FromRow (RowParser, field)
 import Lib.App (WithError)
 import Lib.Core.Game (
     Game (Game, gameSessions),
-    GameID (GameID),
+    GameID (..),
     NewGameRequest (..),
     Session (Session),
  )
+import Lib.Core.Interval (Interval (..))
 import Lib.Db.Functions (WithDb, asSingleRow, query, queryWith, queryWith_)
 
 getGamesWithSessions :: (WithDb env m, WithError m) => m [Game]
@@ -48,7 +49,7 @@ parseGameJoinRow = do
     let mSession = do
             start <- mStart
             end <- mEnd
-            return $ Session start end sName
+            return $ Session (Interval start end) sName
 
     return (gId, gName, gSys, mSession)
 

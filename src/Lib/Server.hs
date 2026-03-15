@@ -3,6 +3,7 @@ module Lib.Server where
 import Lib.App.Monad (AppEnv)
 import Lib.Effects.Log (runAppAsHandler)
 import Lib.Server.Auth (AuthRoutes, authServer)
+import Lib.Server.Availability (AvailabilityRoutes (..), availabilityServer)
 import Lib.Server.Common (AppServer)
 import Lib.Server.Game (GameRoutes (..), gameServer)
 import Servant (Application, NamedRoutes, serve, (:-), (:>))
@@ -17,6 +18,7 @@ type Api = ToApi InitiativeApi
 data InitiativeApi route = InitiativeApi
     { games :: route :- "games" :> NamedRoutes GameRoutes
     , auth :: route :- "auth" :> NamedRoutes AuthRoutes
+    , availability :: route :- "availablilty" :> NamedRoutes AvailabilityRoutes
     }
     deriving stock (Generic)
 
@@ -38,4 +40,5 @@ apiServer =
     InitiativeApi
         { games = gameServer
         , auth = authServer
+        , availability = availabilityServer
         }
