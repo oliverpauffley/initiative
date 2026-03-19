@@ -64,19 +64,23 @@ library
                       Lib.Db.Schema
                       Lib.Db.Game
                       Lib.Db.Player
+                      Lib.Db.Availability
                       Lib.Db.UserSession
 
                       -- Server
                       Lib.Server
                       Lib.Server.Auth
                       Lib.Server.Game
+                      Lib.Server.Availability
                       Lib.Server.Common
 
 
                       -- Core types
                       Lib.Core.Game
+                      Lib.Core.Interval
                       Lib.Core.Player
                       Lib.Core.UserSession
+                      Lib.Core.Availability
                       
                       
     build-depends:    base ^>=4.19.2.0
@@ -165,3 +169,4 @@ executable initiative-integration-tests
       , hspec-core
       , uuid
       , co-log
+      , time

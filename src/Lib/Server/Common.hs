@@ -4,12 +4,13 @@ module Lib.Server.Common (
     WithAuth,
     requireSession,
     requireAdmin,
+    requirePlayer,
 ) where
 
 import Data.UUID (fromText)
 import Lib.App (App)
 import Lib.App.Error (WithError, headerDecodeError, missingHeader, notAllowed, throwError)
-import Lib.Core.Player (Player (..))
+import Lib.Core.Player (Player (..), PlayerID)
 import Lib.Core.UserSession (SessionToken (..), UserSession (..))
 import Lib.Db (WithDb)
 import Lib.Db.Player (getPlayerByID)
@@ -19,6 +20,7 @@ import Servant.Server.Generic (AsServerT)
 
 type AppServer = AsServerT App
 
+-- Group of some common monads that every endpoint (with auth) needs
 type WithAuth env m = (WithDb env m, WithError m, WithLog env m)
 
 -- | Validate the X-Session-Token header and return the authenticated session.
@@ -38,3 +40,11 @@ requireAdmin mRaw = do
     if playerIsAdmin player
         then pure (player, sess)
         else throwError $ notAllowed "Admin access required"
+
+-- | Like 'requireSession' but require that player id is the same as the given ID
+requirePlayer :: (WithAuth env m) => Maybe Text -> PlayerID -> m UserSession
+requirePlayer mRaw playerID = do
+    sess <- requireSession mRaw
+    if sessionPlayerID sess == playerID
+        then pure sess
+        else throwError $ notAllowed "Cannot process request for different user"

@@ -3,7 +3,7 @@ module Lib.Db.Functions where
 
 import Lib.App.Env (DbPool, Has)
 
-import Lib.App.Error (AppErrorType, WithError, dbError, throwError, throwOnNothingM)
+import Lib.App.Error (AppErrorType, WithError, dbError, throwOnNothingM)
 
 import qualified Data.Pool as Pool
 import qualified Database.PostgreSQL.Simple as Sql

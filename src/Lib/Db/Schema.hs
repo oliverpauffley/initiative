@@ -13,7 +13,7 @@ setupDB :: (WithDb env m) => m ()
 setupDB =
     executeRaw
         [sql|
-           create TABLE IF NOT EXISTS games (
+           CREATE TABLE IF NOT EXISTS games (
            id SERIAL PRIMARY KEY
          , name TEXT NOT NULL
          , system TEXT NOT NULL
@@ -21,7 +21,7 @@ setupDB =
         );
 
 
-        create TABLE IF NOT EXISTS sessions (
+        CREATE TABLE IF NOT EXISTS sessions (
            id SERIAL PRIMARY KEY
          , game_id INT REFERENCES games(id)
          , start_time TIMESTAMP WITH TIME ZONE NOT NULL
@@ -30,7 +30,7 @@ setupDB =
         );
 
 
-        create TABLE IF NOT EXISTS players (
+        CREATE TABLE IF NOT EXISTS players (
           id       SERIAL  PRIMARY KEY
         , name     TEXT    NOT NULL
         , email    TEXT    NOT NULL
@@ -38,11 +38,18 @@ setupDB =
         );
 
 
-        create TABLE IF NOT EXISTS user_sessions (
+        CREATE TABLE IF NOT EXISTS user_sessions (
           token      UUID PRIMARY KEY
         , player_id  INT  NOT NULL REFERENCES players(id) ON DELETE CASCADE
         , expires_at TIMESTAMP WITH TIME ZONE NOT NULL
-        )
+        );
+
+        CREATE TABLE IF NOT EXISTS availability (
+           game_id INT NOT NULL REFERENCES games(id) ON DELETE CASCADE
+         , player_id INT NOT NULL REFERENCES players(id) ON DELETE CASCADE
+         , start_time TIMESTAMP WITH TIME ZONE NOT NULL
+         , end_time TIMESTAMP WITH TIME ZONE NOT NULL
+        );
 |]
 
 executeFile :: (WithDb env m) => FilePath -> m ()
@@ -60,6 +67,7 @@ teardownDb =
         [sql|
         DROP TABLE IF EXISTS user_sessions;
         DROP TABLE IF EXISTS sessions;
+        DROP TABLE IF EXISTS availability;
         DROP TABLE IF EXISTS games;
         DROP TABLE IF EXISTS players;
         |]
