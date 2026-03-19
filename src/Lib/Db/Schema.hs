@@ -67,7 +67,7 @@ teardownDb =
         [sql|
         DROP TABLE IF EXISTS user_sessions;
         DROP TABLE IF EXISTS sessions;
+        DROP TABLE IF EXISTS availability;
         DROP TABLE IF EXISTS games;
         DROP TABLE IF EXISTS players;
-        DROP TABLE IF EXISTS availability;
         |]

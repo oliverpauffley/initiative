@@ -30,3 +30,13 @@ equals app v env =
     runAppAsIO env app >>= \case
         Right a -> a `shouldBe` v
         Left e -> expectationFailure $ "Expected 'Success' but got: " <> show e
+
+-- | Checks whether action returns an expected value with given equality function.
+equalsWith :: (Show a) => App a -> a -> (a -> a -> Bool) -> AppEnv -> Expectation
+equalsWith app v approx env =
+    runAppAsIO env app >>= \case
+        Right a ->
+            unless (a `approx` v) $
+                expectationFailure $
+                    "Expected approximately " <> show v <> " but got " <> show a
+        Left e -> expectationFailure $ "Expected 'Success' but got: " <> show e
