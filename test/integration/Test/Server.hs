@@ -58,20 +58,20 @@ gamesSpec env = before_ (runAppLogIO_ env prepareDB) $ describe "Games" $ do
         env & withTestSession (\tok -> getGameHandler (Just tok) 100) `failsWith` singleRowError
     it "should accept a new game" $
         equals
-            ( withTestSession $ \tok ->
-                postNewGameHandler (Just tok) (NewGameRequest "test-game" "test-system")
+            ( withTestPlayerSession $ \tok pid ->
+                postNewGameHandler (Just tok) (NewGameRequest "test-game" "test-system" (PlayerID pid))
             )
-            (Game (GameID 1) "test-game" "test-system" [])
+            (Game (GameID 1) (PlayerID 1) "test-game" "test-system" [])
             env
     it "should return all games" $
         equals
-            ( withTestSession $ \tok -> do
-                _ <- postNewGameHandler (Just tok) (NewGameRequest "test-game" "test-system")
-                _ <- postNewGameHandler (Just tok) (NewGameRequest "test-game-2" "test-system-2")
+            ( withTestPlayerSession $ \tok pid -> do
+                _ <- postNewGameHandler (Just tok) (NewGameRequest "test-game" "test-system" (PlayerID pid))
+                _ <- postNewGameHandler (Just tok) (NewGameRequest "test-game-2" "test-system-2" (PlayerID pid))
                 getAllGamesHandler (Just tok)
             )
-            [ Game (GameID 1) "test-game" "test-system" []
-            , Game (GameID 2) "test-game-2" "test-system-2" []
+            [ Game (GameID 1) (PlayerID 1) "test-game" "test-system" []
+            , Game (GameID 2) (PlayerID 1) "test-game-2" "test-system-2" []
             ]
             env
 
@@ -103,7 +103,7 @@ availabilitySpec env = before_ (runAppLogIO_ env prepareDB) $ describe "Availabi
                 ( withTestPlayerSession
                     ( \tok pID ->
                         do
-                            Game{..} <- postNewGameHandler (Just tok) (NewGameRequest "test-game" "test-system")
+                            Game{..} <- postNewGameHandler (Just tok) (NewGameRequest "test-game" "test-system" (PlayerID pID))
                             postAvailabilityHandler (Just tok) (Availability gameID (PlayerID pID) [Interval start1 end1, Interval start2 end2])
                             *> getAvailabilityHandler (Just tok) 1 pID
                     )

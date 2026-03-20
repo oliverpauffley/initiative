@@ -12,12 +12,13 @@ import Lib.Core.Game (
     Session (Session),
  )
 import Lib.Core.Interval (Interval (..))
+import Lib.Core.Player (PlayerID)
 import Lib.Db.Functions (WithDb, asSingleRow, query, queryWith, queryWith_)
 
 getGamesWithSessions :: (WithDb env m, WithError m) => m [Game]
 getGamesWithSessions = do
     let sql =
-            "SELECT g.id, g.name, g.system, s.start_time, s.end_time, s.name \
+            "SELECT g.id, g.game_master_id, g.name, g.system, s.start_time, s.end_time, s.name \
             \FROM games g \
             \LEFT JOIN sessions s ON g.id = s.game_id"
 
@@ -28,7 +29,7 @@ getGamesWithSessions = do
 getGameWithSessions :: (WithDb env m, WithError m) => GameID -> m Game
 getGameWithSessions gameId = do
     let sql =
-            "SELECT g.id, g.name, g.system, s.start_time, s.end_time, s.name \
+            "SELECT g.id, g.game_master_id, g.name, g.system, s.start_time, s.end_time, s.name \
             \FROM games g \
             \LEFT JOIN sessions s ON g.id = s.game_id \
             \WHERE g.id = ?"
@@ -36,9 +37,10 @@ getGameWithSessions gameId = do
     asSingleRow $ buildGames <$> queryWith parseGameJoinRow sql (Only gameId)
 
 -- Parse a row of the query
-parseGameJoinRow :: RowParser (GameID, Text, Text, Maybe Session)
+parseGameJoinRow :: RowParser (GameID, PlayerID, Text, Text, Maybe Session)
 parseGameJoinRow = do
     gId <- field
+    gPId <- field
     gName <- field
     gSys <- field
 
@@ -51,15 +53,15 @@ parseGameJoinRow = do
             end <- mEnd
             return $ Session (Interval start end) sName
 
-    return (gId, gName, gSys, mSession)
+    return (gId, gPId, gName, gSys, mSession)
 
-buildGames :: [(GameID, Text, Text, Maybe Session)] -> [Game]
+buildGames :: [(GameID, PlayerID, Text, Text, Maybe Session)] -> [Game]
 buildGames rows = Map.elems (foldr step Map.empty rows)
   where
-    step (gId, gName, gSys, mSession) acc =
+    step (gId, gPID, gName, gSys, mSession) acc =
         let
             newSessions = maybe [] pure mSession
-            newGame = Game gId gName gSys newSessions
+            newGame = Game gId gPID gName gSys newSessions
             combineGames _new old = old{gameSessions = gameSessions old ++ newSessions}
          in
             Map.insertWith combineGames gId newGame acc
@@ -67,5 +69,5 @@ buildGames rows = Map.elems (foldr step Map.empty rows)
 -- | Insert a new game into the database. Returns the generated ID.
 insertGame :: (WithDb env m, WithError m) => NewGameRequest -> m GameID
 insertGame req = do
-    let sql = "INSERT INTO games (name, system) VALUES (?,?) RETURNING id;"
+    let sql = "INSERT INTO games (name, system, game_master_id) VALUES (?,?,?) RETURNING id;"
     asSingleRow $ query sql req
