@@ -13,8 +13,17 @@ setupDB :: (WithDb env m) => m ()
 setupDB =
     executeRaw
         [sql|
+
+         CREATE TABLE IF NOT EXISTS players (
+           id       SERIAL  PRIMARY KEY
+         , name     TEXT    NOT NULL
+         , email    TEXT    NOT NULL
+         , is_admin BOOLEAN NOT NULL DEFAULT FALSE
+         );
+
            CREATE TABLE IF NOT EXISTS games (
            id SERIAL PRIMARY KEY
+         , game_master_id INT NOT NULL REFERENCES players(id) ON DELETE CASCADE
          , name TEXT NOT NULL
          , system TEXT NOT NULL
          , created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
@@ -27,14 +36,6 @@ setupDB =
          , start_time TIMESTAMP WITH TIME ZONE NOT NULL
          , end_time TIMESTAMP WITH TIME ZONE NOT NULL
          , name TEXT NOT NULL
-        );
-
-
-        CREATE TABLE IF NOT EXISTS players (
-          id       SERIAL  PRIMARY KEY
-        , name     TEXT    NOT NULL
-        , email    TEXT    NOT NULL
-        , is_admin BOOLEAN NOT NULL DEFAULT FALSE
         );
 
 

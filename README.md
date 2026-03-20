@@ -6,4 +6,3 @@ Organise TTRPG groups and find time slots for games.
 
 - Availabilty as an optional argument to making a new game.
 - Booking algorithms
-- DMs on games as playerIDs

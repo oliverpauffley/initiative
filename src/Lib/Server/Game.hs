@@ -4,7 +4,7 @@ module Lib.Server.Game where
 import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (..))
 import Lib.Db (getGameWithSessions, insertGame)
 import Lib.Db.Game (getGamesWithSessions)
-import Lib.Server.Common (AppServer, WithAuth, requireSession)
+import Lib.Server.Common (AppServer, WithAuth, requirePlayer, requireSession)
 import Servant (Capture, Get, Header, JSON, Post, ReqBody, (:-), (:>))
 
 data GameRoutes route = GameRoutes
@@ -28,9 +28,9 @@ getGameHandler mHeader gID = requireSession mHeader *> getGameWithSessions (Game
 
 postNewGameHandler :: (WithAuth env m) => Maybe Text -> NewGameRequest -> m Game
 postNewGameHandler mHeader r'@NewGameRequest{..} = do
-    _ <- requireSession mHeader
+    _ <- requirePlayer mHeader newGamePlayerID
     gID <- insertGame r'
-    return $ Game gID newGameName newGameSystem []
+    return $ Game gID newGamePlayerID newGameName newGameSystem []
 
 gameServer :: GameRoutes AppServer
 gameServer =
