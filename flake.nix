@@ -2,19 +2,28 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
     utils.url = "github:numtide/flake-utils";
+    cabal-hoogle-src = {
+      url = "github:kokobd/cabal-hoogle";
+      flake = false;
+    };
   };
 
-  outputs = { nixpkgs, utils, self, ... }:
+  outputs = { nixpkgs, utils, self, cabal-hoogle-src, ... }:
     (utils.lib.eachDefaultSystem (system:
       let
+        # Use GHC 9.8 to match base ^>=4.19.2.0 constraint
+        hsPkgs = pkgsOld: pkgsOld.haskell.packages.ghc98;
+
         overlay = pkgsNew: pkgsOld: {
           initiative = pkgsNew.haskell.lib.justStaticExecutables
             pkgsNew.haskellPackages.initiative;
 
-          haskellPackages = pkgsOld.haskellPackages.override (old: {
+          haskellPackages = (hsPkgs pkgsOld).override (old: {
             overrides = hself: hsuper: {
               initiative = pkgsNew.haskell.lib.overrideCabal
                 (hself.callPackage ./initiative.nix { }) (drv: { });
+              cabal-hoogle = pkgsNew.haskell.lib.dontCheck
+                (hself.callCabal2nix "cabal-hoogle" cabal-hoogle-src { });
             };
           });
         };
@@ -73,7 +82,14 @@
 
         devShells.default = pkgs.mkShell {
           inputsFrom = [ pkgs.haskellPackages.initiative.env ];
-          packages = with pkgs; [ postgresql ];
+          packages = with pkgs; [
+            postgresql
+            openssl
+            haskellPackages.cabal-hoogle
+            haskellPackages.haskell-language-server
+            (haskellPackages.hoogleWithPackages (p:
+              pkgs.haskellPackages.initiative.getBuildInputs.haskellBuildInputs))
+          ];
         };
       })) // {
         nixosModules.default = { config, lib, pkgs, ... }:

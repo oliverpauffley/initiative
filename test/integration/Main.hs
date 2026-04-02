@@ -22,7 +22,7 @@ main =
     bracket
         ( mkAppEnv $
             Config
-                "host=localhost port=5432 user=dev dbname=initiative password=dev-password"
+                "host=localhost port=5432 user=dev dbname=initiative password=test"
                 Log.Debug
                 8080
                 (OAuthConfig "" "" "http://localhost/callback" "http://localhost/callback" "http://localhost/userinfo")

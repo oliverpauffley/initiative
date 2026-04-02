@@ -40,6 +40,8 @@ data NewGameRequest = NewGameRequest
 data Session = Session
     { sessionInterval :: !Interval
     , sessionName :: !(Maybe Text)
+    -- , -- The players for the game
+    --  players :: ![PlayerID]
     }
     deriving stock (Generic, Show, Eq)
     deriving (FromJSON, ToJSON)
