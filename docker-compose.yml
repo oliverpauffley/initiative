@@ -6,6 +6,7 @@ services:
       POSTGRES_USER: "dev"
       PGDATA: /data/postgres
       POSTGRES_DB: initiative
+      POSTGRES_PASSWORD: test
     volumes:
       - db:/data/postgres
     ports:

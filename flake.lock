@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "cabal-hoogle-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768094563,
+        "narHash": "sha256-l+By7rG7MG/fMWT27iK5RV9GZm3mJDJU/4XJg2ls9Q8=",
+        "owner": "kokobd",
+        "repo": "cabal-hoogle",
+        "rev": "bd01125094474da3eb65fb787f226a401f0e4336",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kokobd",
+        "repo": "cabal-hoogle",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1768649915,
@@ -18,6 +34,7 @@
     },
     "root": {
       "inputs": {
+        "cabal-hoogle-src": "cabal-hoogle-src",
         "nixpkgs": "nixpkgs",
         "utils": "utils"
       }

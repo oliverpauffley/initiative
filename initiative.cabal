@@ -81,6 +81,9 @@ library
                       Lib.Core.Player
                       Lib.Core.UserSession
                       Lib.Core.Availability
+
+                      -- Booking
+                      Lib.Core.Booking
                       
                       
     build-depends:    base ^>=4.19.2.0
@@ -106,6 +109,8 @@ library
                     , http-client
                     , http-conduit
                     , uri-bytestring
+                    , array
+                    , nonempty-containers
     hs-source-dirs:   src
     default-language: Haskell2010
 
@@ -143,14 +148,18 @@ test-suite initiative-unit-tests
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test/unit
     main-is:          Main.hs
+    other-modules: Lib.Core.BookingSpec
+    build-tool-depends: hspec-discover:hspec-discover == 2.*
     build-depends:
         base ^>=4.19.2.0
       , initiative
       , initiative:test-common
       , hedgehog
+      , hspec-hedgehog
       , mtl
       , hspec
       , hspec-core
+      , nonempty-containers
 
 
 executable initiative-integration-tests
