@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-type-defaults #-}
-
 module Lib.Core.BookingSpec (spec) where
 
 import Lib.Core.Booking
