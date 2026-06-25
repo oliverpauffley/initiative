@@ -3,25 +3,29 @@ module Lib.App.Env (
     grab,
     Has (..),
     DbPool,
+    GoogleClientID,
 ) where
 
 import Colog (HasLog (..), LogAction, Message)
 import Data.Pool (Pool)
 import Database.PostgreSQL.Simple (Connection)
 import Network.HTTP.Client (Manager)
-import Network.OAuth.OAuth2 (OAuth2)
-import URI.ByteString (Absolute, Port, URIRef)
+import Servant.Auth.Server (CookieSettings, JWTSettings)
+import URI.ByteString (Port)
 
 -- Type alias for postgresconnection
 type DbPool = Pool Connection
+
+type GoogleClientID = Text
 
 data Env (m :: Type -> Type) = Env
     { envDbPool :: !DbPool
     , envPort :: !Port
     , envLogAction :: !(LogAction m Message)
     , envHttpManager :: !Manager
-    , envOAuth :: !OAuth2
-    , envUserInfoUri :: !(URIRef Absolute)
+    , envGoogleClientID :: !GoogleClientID
+    , envCookieSettings :: !CookieSettings
+    , envJWTSettings :: !JWTSettings
     }
 
 instance HasLog (Env m) Message m where
@@ -40,8 +44,9 @@ instance Has DbPool (Env m) where obtain = envDbPool
 instance Has Port (Env m) where obtain = envPort
 instance Has (LogAction m Message) (Env m) where obtain = envLogAction
 instance Has Manager (Env m) where obtain = envHttpManager
-instance Has OAuth2 (Env m) where obtain = envOAuth
-instance Has (URIRef Absolute) (Env m) where obtain = envUserInfoUri
+instance Has GoogleClientID (Env m) where obtain = envGoogleClientID
+instance Has CookieSettings (Env m) where obtain = envCookieSettings
+instance Has JWTSettings (Env m) where obtain = envJWTSettings
 
 grab :: forall field env m. (MonadReader env m, Has field env) => m field
 grab = asks $ obtain @field

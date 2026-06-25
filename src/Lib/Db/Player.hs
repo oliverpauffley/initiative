@@ -15,6 +15,14 @@ getPlayerByID pID = do
     let sql = "SELECT id, name, email, is_admin FROM players WHERE id = ?;"
     asSingleRow $ query sql (Only pID)
 
+-- Google's unique indenfier for a user
+type Sub = Text
+
+getPlayerBySub :: (WithDb env m, WithError m) => Sub -> m Player
+getPlayerBySub pID = do
+    let sql = "SELECT id, name, email, is_admin FROM players WHERE id = ?;"
+    asSingleRow $ query sql (Only pID)
+
 getPlayers :: (WithDb env m, WithError m) => m [Player]
 getPlayers = do
     let sql = "SELECT id, name, email, is_admin FROM players;"

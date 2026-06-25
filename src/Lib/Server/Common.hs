@@ -2,6 +2,7 @@
 module Lib.Server.Common (
     AppServer,
     WithAuth,
+    requireAuth,
     requireSession,
     requireAdmin,
     requirePlayer,
@@ -16,12 +17,17 @@ import Lib.Db (WithDb)
 import Lib.Db.Player (getPlayerByID)
 import Lib.Db.UserSession (lookupSession)
 import Lib.Effects.Log (WithLog)
+import Servant.Auth.Server (AuthResult (Authenticated))
 import Servant.Server.Generic (AsServerT)
 
 type AppServer = AsServerT App
 
 -- Group of some common monads that every endpoint (with auth) needs
 type WithAuth env m = (WithDb env m, WithError m, WithLog env m)
+
+requireAuth :: AuthResult UserSession -> (UserSession -> App a) -> App a
+requireAuth (Authenticated token) handler = handler token
+requireAuth _ _ = throwError $ notAllowed "Unauthorized access"
 
 -- | Validate the X-Session-Token header and return the authenticated session.
 requireSession :: (WithAuth env m) => Maybe Text -> m UserSession

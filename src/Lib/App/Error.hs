@@ -21,6 +21,7 @@ module Lib.App.Error (
     missingHeader,
     headerDecodeError,
     dbError,
+    jwtError,
     limitError,
     redirect,
 
@@ -104,8 +105,10 @@ data IError
     | -- | An authentication header that was required was provided but not in a
       --     format that the server can understand
       HeaderDecodeError Text
-    | -- | Data base specific errors.
+    | -- | Database specific errors.
       DbError Text
+    | -- | Errors decoding json tokens
+      JWTError Text
     | -- | Limits on the multi-request are overflowed.
       LimitError
     | -- | Issue an HTTP redirect (used for OAuth login flow).
@@ -123,14 +126,9 @@ toHttpError (AppError _callStack errorType) = case errorType of
         MissingHeader name -> err401{errBody = toLazy $ "Header not found: " <> foldedCase name}
         HeaderDecodeError name -> err401{errBody = encodeUtf8 $ "Unable to decode header: " <> name}
         DbError e -> err500{errBody = encodeUtf8 e}
+        JWTError e -> err500{errBody = encodeUtf8 e}
         LimitError -> err413{errBody = "Request is over the limits"}
         Redirect url -> err302{errHeaders = [(hLocation, encodeUtf8 url)]}
-
---    MobileAppError err -> let errMsg = Proto.ErrorResponse err mempty in
---        err400 { errBody = fromStrict $ encodeMessage errMsg }
---    ExternalError err -> case err of
---        ClientError e -> clientErrortoServantErr e
---        -- _             -> err400 { errBody = "External error" }
 
 -- clientErrortoServantErr :: ServantError -> Servant.ServerError
 -- clientErrortoServantErr = \case
@@ -187,6 +185,9 @@ missingHeader = InternalError . MissingHeader
 
 headerDecodeError :: Text -> AppErrorType
 headerDecodeError = InternalError . HeaderDecodeError
+
+jwtError :: Text -> AppErrorType
+jwtError = InternalError . JWTError
 
 dbError :: Text -> AppErrorType
 dbError = InternalError . DbError

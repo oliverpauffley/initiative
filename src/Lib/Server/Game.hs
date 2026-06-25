@@ -2,40 +2,40 @@
 module Lib.Server.Game where
 
 import Lib.Core.Game (Game (..), GameID (..), NewGameRequest (..))
+import Lib.Core.UserSession (UserSession)
 import Lib.Db (getGameWithSessions, insertGame)
 import Lib.Db.Game (getGamesWithSessions)
-import Lib.Server.Common (AppServer, WithAuth, requirePlayer, requireSession)
-import Servant (Capture, Get, Header, JSON, Post, ReqBody, (:-), (:>))
+import Lib.Server.Common (AppServer, WithAuth, requireAuth)
+import Servant (Capture, Get, JSON, Post, ReqBody, (:-), (:>))
+import Servant.Auth.Server (AuthResult)
 
 data GameRoutes route = GameRoutes
     { getAllGames ::
-        route :- Header "X-Session-Token" Text :> Get '[JSON] [Game]
-    , getGame ::
-        route :- Header "X-Session-Token" Text :> Capture "gameID" Int :> Get '[JSON] Game
+        route :- Get '[JSON] [Game]
+    , getGame :: route :- Capture "gameID" Int :> Get '[JSON] Game
     , postNewGame ::
         route
-            :- Header "X-Session-Token" Text
-                :> ReqBody '[JSON] NewGameRequest
+            :- ReqBody '[JSON] NewGameRequest
                 :> Post '[JSON] Game
     }
     deriving (Generic)
 
-getAllGamesHandler :: (WithAuth env m) => Maybe Text -> m [Game]
-getAllGamesHandler mHeader = requireSession mHeader *> getGamesWithSessions
+getAllGamesHandler :: (WithAuth env m) => m [Game]
+getAllGamesHandler = getGamesWithSessions
 
-getGameHandler :: (WithAuth env m) => Maybe Text -> Int -> m Game
-getGameHandler mHeader gID = requireSession mHeader *> getGameWithSessions (GameID gID)
+getGameHandler :: (WithAuth env m) => Int -> m Game
+getGameHandler gID = getGameWithSessions (GameID gID)
 
-postNewGameHandler :: (WithAuth env m) => Maybe Text -> NewGameRequest -> m Game
-postNewGameHandler mHeader r'@NewGameRequest{..} = do
-    _ <- requirePlayer mHeader newGamePlayerID
+-- TODO require admin
+postNewGameHandler :: (WithAuth env m) => NewGameRequest -> m Game
+postNewGameHandler r'@NewGameRequest{..} = do
     gID <- insertGame r'
     return $ Game gID newGamePlayerID newGameName newGameSystem []
 
-gameServer :: GameRoutes AppServer
-gameServer =
+gameServer :: AuthResult UserSession -> GameRoutes AppServer
+gameServer authResult =
     GameRoutes
-        { getAllGames = getAllGamesHandler
-        , getGame = getGameHandler
-        , postNewGame = postNewGameHandler
+        { getAllGames = requireAuth authResult $ const getAllGamesHandler
+        , getGame = \gameID -> requireAuth authResult $ \_ -> getGameHandler gameID
+        , postNewGame = \gameReq -> requireAuth authResult $ \_ -> postNewGameHandler gameReq
         }

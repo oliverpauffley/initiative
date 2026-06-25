@@ -4,26 +4,29 @@ module Lib.Server.Availability where
 import Lib.Core.Availability (Availability (..))
 import Lib.Core.Game (GameID (..))
 import Lib.Core.Player (PlayerID (..))
+import Lib.Core.UserSession (UserSession)
 import Lib.Db.Availability (insertAvailability, selectAvailability)
-import Lib.Server.Common (AppServer, WithAuth, requirePlayer)
-import Servant (Capture, Get, Header, JSON, NoContent (NoContent), Post, ReqBody, (:-), (:>))
+import Lib.Server.Common (AppServer, WithAuth, requireAuth)
+import Servant (Capture, Get, JSON, NoContent (NoContent), Post, ReqBody, (:-), (:>))
+import Servant.Auth.Server (AuthResult)
 
 data AvailabilityRoutes route = AvailabilityRoutes
     { addAvailability ::
-        route :- Header "X-Session-Token" Text :> ReqBody '[JSON] Availability :> Post '[JSON] NoContent
-    , getAvailability :: route :- Header "X-Session-Token" Text :> Capture "gameID" Int :> Capture "playerID" Int :> Get '[JSON] Availability
+        route :- ReqBody '[JSON] Availability :> Post '[JSON] NoContent
+    , getAvailability :: route :- Capture "gameID" Int :> Capture "playerID" Int :> Get '[JSON] Availability
     }
     deriving (Generic)
 
-postAvailabilityHandler :: (WithAuth env m) => Maybe Text -> Availability -> m NoContent
-postAvailabilityHandler mHeader req@Availability{..} = (requirePlayer mHeader _addPlayerID *> insertAvailability req) $> NoContent
+-- TODO require player
+postAvailabilityHandler :: (WithAuth env m) => Availability -> m NoContent
+postAvailabilityHandler req = insertAvailability req $> NoContent
 
-getAvailabilityHandler :: (WithAuth env m) => Maybe Text -> Int -> Int -> m Availability
-getAvailabilityHandler mHeader gID pID = requirePlayer mHeader (PlayerID pID) *> selectAvailability (GameID gID) (PlayerID pID)
+getAvailabilityHandler :: (WithAuth env m) => Int -> Int -> m Availability
+getAvailabilityHandler gID pID = selectAvailability (GameID gID) (PlayerID pID)
 
-availabilityServer :: AvailabilityRoutes AppServer
-availabilityServer =
+availabilityServer :: AuthResult UserSession -> AvailabilityRoutes AppServer
+availabilityServer token =
     AvailabilityRoutes
-        { addAvailability = postAvailabilityHandler
-        , getAvailability = getAvailabilityHandler
+        { addAvailability = \availabilityRequest -> requireAuth token $ \_ -> postAvailabilityHandler availabilityRequest
+        , getAvailability = \gID pID -> requireAuth token $ \_ -> getAvailabilityHandler gID pID
         }

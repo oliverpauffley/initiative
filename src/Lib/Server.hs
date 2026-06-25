@@ -1,44 +1,72 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Lib.Server where
 
+import Lib.App (App, Env (..))
 import Lib.App.Monad (AppEnv)
+import Lib.Core.UserSession (UserSession)
 import Lib.Effects.Log (runAppAsHandler)
 import Lib.Server.Auth (AuthRoutes, authServer)
 import Lib.Server.Availability (AvailabilityRoutes (..), availabilityServer)
-import Lib.Server.Common (AppServer)
 import Lib.Server.Game (GameRoutes (..), gameServer)
-import Servant (Application, NamedRoutes, serve, (:-), (:>))
+import Servant (Application, Context (EmptyContext, (:.)), HasServer (hoistServerWithContext), NamedRoutes, serveWithContext, (:-), (:>))
 import Servant.API.Generic (ToServantApi, toServant)
-import Servant.Server (Server, hoistServer)
+import Servant.Auth.Server (Auth, AuthResult, CookieSettings, JWT, JWTSettings)
+import Servant.Server (Server)
+import Servant.Server.Generic (AsServerT)
 
 type ToApi (site :: Type -> Type) = ToServantApi site
 
--- Server type level api
-type Api = ToApi InitiativeApi
+data Unprotected route = AuthRoutes
 
-data InitiativeApi route = InitiativeApi
+data Protected route = Protected
     { games :: route :- "games" :> NamedRoutes GameRoutes
-    , auth :: route :- "auth" :> NamedRoutes AuthRoutes
     , availability :: route :- "availablilty" :> NamedRoutes AvailabilityRoutes
     }
     deriving stock (Generic)
 
-server :: AppEnv -> Server Api
+data Site auths route = Site
+    { unprotected :: route :- NamedRoutes AuthRoutes
+    , protected :: route :- Auth auths UserSession :> NamedRoutes Protected
+    }
+    deriving (Generic)
+
+type Api auths = ToServantApi (Site auths)
+type AuthContext = '[CookieSettings, JWTSettings]
+
+server :: AppEnv -> Server (Api '[JWT])
 server env =
-    hoistServer
-        (Proxy @Api)
-        (runAppAsHandler env)
-        (toServant apiServer)
+    let
+        contextProxy = Proxy @AuthContext
+     in
+        hoistServerWithContext
+            (Proxy @(Api '[JWT]))
+            contextProxy
+            (runAppAsHandler env)
+            (toServant apiServer)
 
 application :: AppEnv -> Application
 application env =
-    serve
-        (Proxy @Api)
-        (server env)
+    let
+        cSettings = envCookieSettings env
+        jSettings = envJWTSettings env
+        context = cSettings :. jSettings :. EmptyContext
+     in
+        serveWithContext
+            (Proxy @(Api '[JWT]))
+            context
+            (server env)
 
-apiServer :: InitiativeApi AppServer
+protectedServer :: AuthResult UserSession -> Protected (AsServerT App)
+protectedServer authResult =
+    Protected
+        { games = gameServer authResult
+        , availability = availabilityServer authResult
+        }
+
+apiServer :: Site auths (AsServerT App)
 apiServer =
-    InitiativeApi
-        { games = gameServer
-        , auth = authServer
-        , availability = availabilityServer
+    Site
+        { unprotected = authServer
+        , protected = protectedServer
         }

@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <script
+            src="https://accounts.google.com/gsi/client"
+            async
+            defer
+        ></script>
+        <script src="elm.js"></script>
+        <script>
+            const app = Elm.Main.init({});
+
+            function handleCredentialResponse(response) {
+                // Send the Google JWT string to Elm via a port
+                app.ports.receiveGoogleToken.send(response.credential);
+            }
+
+            app.ports.initGoogleAuth.subscribe(function () {
+                // requestAnimationFrame ensures the Elm Virtual DOM
+                // has been rendered to the actual browser DOM.
+                window.requestAnimationFrame(() => {
+                    google.accounts.id.initialize({
+                        client_id:
+                            "516515160901-gplvj9iffqr8kvj8ff3m5a7tr5353j8t.apps.googleusercontent.com",
+                        callback: handleCredentialResponse,
+                    });
+
+                    const parent = document.getElementById(
+                        "google-button-container",
+                    );
+                    if (parent) {
+                        google.accounts.id.renderButton(parent, {
+                            theme: "outline",
+                        });
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

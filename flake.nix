@@ -83,6 +83,8 @@
         devShells.default = pkgs.mkShell {
           inputsFrom = [ pkgs.haskellPackages.initiative.env ];
           packages = with pkgs; [
+            elmPackages.elm
+            elmPackages.elm-live
             postgresql
             openssl
             haskellPackages.cabal-hoogle
