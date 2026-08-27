@@ -26,5 +26,5 @@ configT =
         <*> Toml.text "googleClientID" .= cGoogleClientID
 
 -- | Loads the @config.toml@ file.
-loadConfig :: (MonadIO m) => m Config
-loadConfig = Toml.decodeFile configT "config.toml"
+loadConfig :: (MonadIO m) => String -> m Config
+loadConfig = Toml.decodeFile configT

@@ -34,4 +34,4 @@ runServer :: AppEnv -> IO ()
 runServer env = run ((grab @Port) env).portNumber $ application env
 
 main :: IO ()
-main = loadConfig >>= mkAppEnv >>= runServer
+main = loadConfig "config.toml" >>= mkAppEnv >>= runServer

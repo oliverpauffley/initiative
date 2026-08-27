@@ -1,5 +1,0 @@
-dbCredentials = "host=localhost port=5432 user=dev dbname=initiative password=dev-password"
-log.severity  = "Debug"
-port = 8080
-googleClientID = "testclient"
-
